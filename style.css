@@ -63,7 +63,7 @@ html, body {
   font-size: 0.95rem;
   #border-bottom: 2px solid #ccc;
   border-radius: 20px;
-  background-color: #5A5A5A; /* Grey background */
+  background-color: #000000; /* Grey background */
   color: #fff;  /* Optional: white text for contrast */
   text-shadow: 
     -1px -1px 0 #000,  
