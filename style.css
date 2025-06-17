@@ -61,7 +61,15 @@ html, body {
   color: #333;
   padding: 1rem;
   font-size: 0.95rem;
-  border-bottom: 2px solid #ccc;
+  #border-bottom: 2px solid #ccc;
+  border-radius: 20px;
+  background-color: #5A5A5A; /* Grey background */
+  color: #fff;  /* Optional: white text for contrast */
+  text-shadow: 
+    -1px -1px 0 #000,  
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
 }
 
 #about-panel h3 {
