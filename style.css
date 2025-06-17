@@ -87,7 +87,7 @@ html, body {
 
 #sidebar {
   width: 300px;
-  background-color: #f8f8f8;
+  background-color: #000000;
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -97,8 +97,8 @@ html, body {
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
   max-height: 100%; /* ⬅ Add this so the sidebar fills its space and scrolls fully */
   border-radius: 10px;
-  background-color: #000; /* Black background */
-  color: #fff;  /* Optional: white text for contrast */
+  background-color: #5A5A5A; /* Grey background */
+  #color: #fff;  /* Optional: white text for contrast */
 }
 
 #map {
