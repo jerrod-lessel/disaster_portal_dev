@@ -99,6 +99,11 @@ html, body {
   border-radius: 20px;
   background-color: #5A5A5A; /* Grey background */
   color: #fff;  /* Optional: white text for contrast */
+  text-shadow: 
+    -1px -1px 0 #000,  
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
 }
 
 #map {
