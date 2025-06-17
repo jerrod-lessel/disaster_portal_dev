@@ -57,13 +57,13 @@ html, body {
 }
 
 #about-panel {
-  background: #000000;
+  #background: #000000;
   color: #333;
   padding: 1rem;
   font-size: 0.95rem;
   #border-bottom: 2px solid #ccc;
   border-radius: 20px;
-  background-color: #000000; /* Grey background */
+  background-color: #5A5A5A; /* Grey background */
   color: #fff;  /* Optional: white text for contrast */
   text-shadow: 
     -1px -1px 0 #000,  
@@ -74,6 +74,7 @@ html, body {
 
 #about-panel h3 {
   margin-top: 0;
+  background: #000000;
 }
 
 .hidden {
