@@ -96,6 +96,9 @@ html, body {
   overflow-y: auto;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
   max-height: 100%; /* ⬅ Add this so the sidebar fills its space and scrolls fully */
+  border-radius: 10px;
+  background-color: #000; /* Black background */
+  color: #fff;  /* Optional: white text for contrast */
 }
 
 #map {
@@ -104,6 +107,8 @@ html, body {
   border: 2px solid black;
   position: relative;
   z-index: 1;
+  border-radius: 10px;
+  overflow: hidden;  /* Ensures inner map doesn't spill out of rounded corners */
 }
 
 #report-content {
