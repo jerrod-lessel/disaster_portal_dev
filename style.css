@@ -96,7 +96,7 @@ html, body {
   overflow-y: auto;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
   max-height: 100%; /* ⬅ Add this so the sidebar fills its space and scrolls fully */
-  border-radius: 30px;
+  border-radius: 20px;
   background-color: #5A5A5A; /* Grey background */
   color: #fff;  /* Optional: white text for contrast */
 }
@@ -107,7 +107,7 @@ html, body {
   border: 2px solid black;
   position: relative;
   z-index: 1;
-  border-radius: 30px;
+  border-radius: 20px;
   overflow: hidden;  /* Ensures inner map doesn't spill out of rounded corners */
 }
 
