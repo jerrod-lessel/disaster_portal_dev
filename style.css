@@ -92,7 +92,7 @@ html, body {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  border-right: 2px solid #ccc;
+  #border-right: 2px solid #ccc;
   overflow-y: auto;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
   max-height: 100%; /* ⬅ Add this so the sidebar fills its space and scrolls fully */
