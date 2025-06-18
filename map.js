@@ -155,7 +155,7 @@ var shakingLayer = L.esri.dynamicMapLayer({
 var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
   style: function () {
-    return { color: '#242424', weight: 3 };
+    return { color: '#242424', weight: 2 };
   }
 })//.addTo(map);
 
