@@ -171,8 +171,8 @@ var allRoadsLayer = L.esri.featureLayer({
 map.on('zoomend', function() {
   var zoom = map.getZoom();
   if (zoom <= 10) {
-    if (map.hasLayer(allRoadsLayer)) map.removeLayer(allRoadsLayer);
-    if (map.hasLayer(highwayLayer)) map.addLayer(highwayLayer);
+    if (!map.hasLayer(allRoadsLayer)) map.removeLayer(allRoadsLayer);
+    if (!map.hasLayer(highwayLayer)) map.addLayer(highwayLayer);
   } else {
     if (map.hasLayer(highwayLayer)) map.removeLayer(highwayLayer);
     if (!map.hasLayer(allRoadsLayer)) map.addLayer(allRoadsLayer);
