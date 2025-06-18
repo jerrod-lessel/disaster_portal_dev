@@ -149,7 +149,7 @@ var drinkP_Layer = L.esri.featureLayer({
 var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
   style: function () {
-    return { color: '#242424', weight: 2 };
+    return { color: '#242424', weight: 3 };
   }
 })//.addTo(map);
 
