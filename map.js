@@ -151,19 +151,19 @@ var shakingLayer = L.esri.dynamicMapLayer({
   opacity: 0.6
 })//.addTo(map);
 
-// Caltrans National Highway System (visible at zoom <= 10)
-var highwayLayer = L.esri.featureLayer({
-  url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
-  style: function () {
-    return { color: '#242424', weight: 3 };
-  }
-})//.addTo(map);
-
 // Caltrans All Roads (visible at zoom >= 11)
 var allRoadsLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/All_Roads/MapServer/0',
   style: function () {
     return { color: '#5c5c5c', weight: 1 };
+  }
+})//.addTo(map);
+
+// Caltrans National Highway System (visible at zoom <= 10)
+var highwayLayer = L.esri.featureLayer({
+  url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
+  style: function () {
+    return { color: '#242424', weight: 3 };
   }
 })//.addTo(map);
 
@@ -174,8 +174,8 @@ map.on('zoomend', function() {
     if (map.hasLayer(allRoadsLayer)) map.removeLayer(allRoadsLayer);
     if (!map.hasLayer(highwayLayer)) map.addLayer(highwayLayer);
   } else {
-    if (!map.hasLayer(highwayLayer)) map.removeLayer(highwayLayer);
     if (!map.hasLayer(allRoadsLayer)) map.addLayer(allRoadsLayer);
+    if (!map.hasLayer(highwayLayer)) map.removeLayer(highwayLayer);
   }
 });
 
