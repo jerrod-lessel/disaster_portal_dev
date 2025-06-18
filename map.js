@@ -149,7 +149,7 @@ var drinkP_Layer = L.esri.featureLayer({
 var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
   style: function () {
-    return { color: '#FF4500', weight: 2 };
+    return { color: '#242424', weight: 2 };
   }
 })//.addTo(map);
 
@@ -157,7 +157,7 @@ var highwayLayer = L.esri.featureLayer({
 var allRoadsLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/All_Roads/MapServer/0',
   style: function () {
-    return { color: '#4682B4', weight: 1 };
+    return { color: '#5c5c5c', weight: 1 };
   }
 })//.addTo(map);
 
@@ -178,7 +178,6 @@ map.on('zoomend', function() {
     if (!map.hasLayer(allRoadsLayer)) map.addLayer(allRoadsLayer);
   }
 });
-
 
 // --- Controls ---
 
