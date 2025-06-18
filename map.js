@@ -145,6 +145,12 @@ var drinkP_Layer = L.esri.featureLayer({
   }
 })//.addTo(map);
 
+// Earthquake Shaking Potential Layer (visual only)
+var shakingLayer = L.esri.dynamicMapLayer({
+  url: 'https://gis.conservation.ca.gov/server/rest/services/CGS/MS48_ShakingPotential/MapServer',
+  opacity: 0.6
+})//.addTo(map);
+
 // Caltrans National Highway System (visible at zoom <= 10)
 var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
@@ -161,18 +167,12 @@ var allRoadsLayer = L.esri.featureLayer({
   }
 })//.addTo(map);
 
-// Earthquake Shaking Potential Layer (visual only)
-var shakingLayer = L.esri.dynamicMapLayer({
-  url: 'https://gis.conservation.ca.gov/server/rest/services/CGS/MS48_ShakingPotential/MapServer',
-  opacity: 0.6
-})//.addTo(map);
-
 // Road layer level zoom logic
 map.on('zoomend', function() {
   var zoom = map.getZoom();
   if (zoom <= 10) {
     if (map.hasLayer(allRoadsLayer)) map.removeLayer(allRoadsLayer);
-    if (!map.hasLayer(highwayLayer)) map.addLayer(highwayLayer);
+    if (map.hasLayer(highwayLayer)) map.addLayer(highwayLayer);
   } else {
     if (map.hasLayer(highwayLayer)) map.removeLayer(highwayLayer);
     if (!map.hasLayer(allRoadsLayer)) map.addLayer(allRoadsLayer);
