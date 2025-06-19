@@ -344,7 +344,7 @@ function getClosestFeatureByEdgeDistance(layer, clickLatLng, label, fieldName, r
         }
       });
       if (bestFeature) {
-        results.push(`✅ <strong>Nearest ${label}:</strong> ${bestFeature.properties[fieldName]}<br>📏 Distance: ${minDist} mi`);
+        results.push(`▪ <strong>Nearest ${label}:</strong> ${bestFeature.properties[fieldName]}<br>📏 Distance: ${minDist} mi`);
       } else {
         results.push(`❌ <strong>${label}:</strong> Unable to measure distance`);
       }
