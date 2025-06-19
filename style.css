@@ -29,7 +29,6 @@ html, body {
 #title-container {
   display: flex;
   flex-direction: column;
-  background-color: #000000;
 }
 
 #main-title {
@@ -63,7 +62,7 @@ html, body {
   padding: 1rem;
   font-size: 0.95rem;
   #border-bottom: 2px solid #ccc;
-  border-radius: 13px;
+  #border-radius: 13px;
   #background-color: #5A5A5A; /* Grey background */
   color: #eeeeee;
 }
