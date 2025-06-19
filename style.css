@@ -99,7 +99,7 @@ html, body {
   max-height: 100%; /* ⬅ Add this so the sidebar fills its space and scrolls fully */
   border-radius: 20px;
   background-color: #5A5A5A; /* Grey background */
-  color: #dddddd;  /* Optional: white text for contrast */
+  color: #eeeeee;  /* Optional: white text for contrast */
 }
 
 #map {
