@@ -154,6 +154,7 @@ var shakingLayer = L.esri.dynamicMapLayer({
 // Caltrans National Highway System (visible at zoom <= 10)
 var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
+  attribution: 'Caltrans'
   style: function () {
     return { color: '#242424', weight: 2 };
   }
@@ -162,6 +163,7 @@ var highwayLayer = L.esri.featureLayer({
 // Caltrans All Roads (visible at zoom >= 11)
 var allRoadsLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/All_Roads/MapServer/0',
+  attribution: 'Caltrans/DRISI'
   style: function () {
     return { color: '#5c5c5c', weight: 1 };
   }
