@@ -57,13 +57,14 @@ html, body {
 }
 
 #about-panel {
-  background: #f8f8f8;
+  background: #5A5A5A;
   color: #333;
   padding: 1rem;
   font-size: 0.95rem;
   #border-bottom: 2px solid #ccc;
-  border-radius: 20px;
+  border-radius: 13px;
   #background-color: #5A5A5A; /* Grey background */
+  color: #eeeeee;
 }
 
 #about-panel h3 {
@@ -97,7 +98,7 @@ html, body {
   overflow-y: auto;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
   max-height: 100%; /* ⬅ Add this so the sidebar fills its space and scrolls fully */
-  border-radius: 20px;
+  border-radius: 13px;
   background-color: #5A5A5A; /* Grey background */
   color: #eeeeee;  /* Optional: white text for contrast */
 }
@@ -108,7 +109,7 @@ html, body {
   border: 2px solid black;
   position: relative;
   z-index: 1;
-  border-radius: 20px;
+  border-radius: 13px;
   overflow: hidden;  /* Ensures inner map doesn't spill out of rounded corners */
 }
 
@@ -137,7 +138,7 @@ html, body {
   background: #fff;
   padding: 10px;
   border: 2px solid #000;
-  border-radius: 8px;
+  border-radius: 4px;
   max-height: 300px;
   overflow-y: auto;
   width: 250px;
