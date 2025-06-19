@@ -29,6 +29,7 @@ html, body {
 #title-container {
   display: flex;
   flex-direction: column;
+  background-color: #000000;
 }
 
 #main-title {
@@ -68,7 +69,6 @@ html, body {
 }
 
 #about-panel h3 {
-  background-color: #000000;
   margin-top: 0;
 }
 
