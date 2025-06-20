@@ -173,12 +173,10 @@ var schoolsLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/SchoolSites2324/FeatureServer/0',
   attribution: 'California Department of Education',
   pointToLayer: function (geojson, latlng) {
-    return L.circleMarker(latlng, {
-      radius: 4,
-      color: '#333',
-      fillColor: '#0078FF',
-      fillOpacity: 0.7,
-      weight: 1
+    icon: L.divIcon({
+      html: "🏫",
+      className: "",
+      iconSize: [20, 20]
     });
   },
   onEachFeature: function (feature, layer) {
@@ -187,16 +185,6 @@ var schoolsLayer = L.esri.featureLayer({
     layer.bindPopup(`<strong>${name}</strong><br>${district}`);
   }
 });
-pointToLayer: function (geojson, latlng) {
-  return L.marker(latlng, {
-    icon: L.divIcon({
-      html: "🏫",
-      className: "",
-      iconSize: [20, 20]
-    })
-  });
-}
-
 
 // Road layer level zoom logic
 map.on('zoomend', function() {
