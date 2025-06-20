@@ -191,6 +191,16 @@ map.on('zoomend', function() {
   }
 });
 
+// School layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 12) {
+    if (!map.hasLayer(schoolsLayer)) map.addLayer(schoolsLayer);
+  } else {
+    if (map.hasLayer(schoolsLayer)) map.removeLayer(schoolsLayer);
+  }
+});
+
+
 // --- Controls ---
 
 // Layer Control
