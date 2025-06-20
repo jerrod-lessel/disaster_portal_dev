@@ -182,7 +182,7 @@ var schoolsLayer = L.esri.featureLayer({
       weight: 1
     });
   }
-});
+})//.addTo(map);
 
 // Road layer level zoom logic
 map.on('zoomend', function() {
