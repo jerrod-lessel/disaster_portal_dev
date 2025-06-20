@@ -169,7 +169,6 @@ var allRoadsLayer = L.esri.featureLayer({
   }
 })//.addTo(map);
 
-// Schools Layer (Public K-12 Schools)
 var schoolsLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/SchoolSites2324/FeatureServer/0',
   attribution: 'California Department of Education',
@@ -181,8 +180,23 @@ var schoolsLayer = L.esri.featureLayer({
       fillOpacity: 0.7,
       weight: 1
     });
+  },
+  onEachFeature: function (feature, layer) {
+    var name = feature.properties.SchoolName || "Unknown School";
+    var district = feature.properties.DistrictName || "Unknown District";
+    layer.bindPopup(`<strong>${name}</strong><br>${district}`);
   }
-})//.addTo(map);
+});
+pointToLayer: function (geojson, latlng) {
+  return L.marker(latlng, {
+    icon: L.divIcon({
+      html: "🏫",
+      className: "",
+      iconSize: [20, 20]
+    })
+  });
+}
+
 
 // Road layer level zoom logic
 map.on('zoomend', function() {
