@@ -169,6 +169,21 @@ var allRoadsLayer = L.esri.featureLayer({
   }
 })//.addTo(map);
 
+// Schools Layer (Public K-12 Schools)
+var schoolsLayer = L.esri.featureLayer({
+  url: 'https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/SchoolSites2324/FeatureServer/0',
+  attribution: 'California Department of Education',
+  pointToLayer: function (geojson, latlng) {
+    return L.circleMarker(latlng, {
+      radius: 4,
+      color: '#333',
+      fillColor: '#0078FF',
+      fillOpacity: 0.7,
+      weight: 1
+    });
+  }
+})//.addTo(map);
+
 // Road layer level zoom logic
 map.on('zoomend', function() {
   var zoom = map.getZoom();
@@ -194,6 +209,7 @@ L.control.layers({ "OpenStreetMap": baseOSM }, {
   "Ozone Percentiles": ozoneLayer,
   "PM2.5 Concentration": pmLayer,
   "Water Contaminant Percentile": drinkP_Layer,
+  "Public Schools (K-12)": schoolsLayer,
 }).addTo(map);
 
 // Scale Bar
