@@ -173,14 +173,9 @@ var allRoadsLayer = L.esri.featureLayer({
 var schoolsLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/SchoolSites2324/FeatureServer/0',
   attribution: 'California Department of Education',
-  pointToLayer: function (geojson, latlng) {
-    return L.circleMarker(latlng, {
-      radius: 4,
-      color: '#333',
-      fillColor: '#0078FF',
-      fillOpacity: 0.7,
-      weight: 1
-    });
+  //pointToLayer: function (geojson, latlng) {
+    style: function () {
+    return { radius: 4, color: '#333333', fillColor: '#0078FF', fillOpacity: 0.7, weight: 1 };
   }
 })//.addTo(map);
 
