@@ -177,14 +177,30 @@ var schoolsLayer = L.esri.featureLayer({
     icon: L.divIcon({
       html: "🏫",
       className: "",
-      iconSize: [20, 20]
+      iconSize: [40, 40]
       })
     });
   },
   onEachFeature: function (feature, layer) {
     var name = feature.properties.SchoolName || "Unknown School";
     var district = feature.properties.DistrictName || "Unknown District";
-    layer.bindPopup(`<strong>${name}</strong><br>${district}`);
+    var props = feature.properties;
+    var name = props.SchoolName || "Unknown School";
+    var district = props.DistrictName || "Unknown District";
+    var type = props.SchoolType || "N/A";
+    var status = props.StatusType || "N/A";
+    var charter = props.Charter === "Y" ? "Yes" : (props.Charter === "N" ? "No" : "N/A");
+    var magnet = props.Magnet === "Y" ? "Yes" : (props.Magnet === "N" ? "No" : "N/A");
+    var enroll = props.EnrollTotal !== null ? props.EnrollTotal : "N/A";
+    layer.bindPopup(`
+    <strong>${name}</strong><br>
+    <em>${district}</em><br>
+    Type: ${type}<br>
+    Status: ${status}<br>
+    Charter: ${charter}<br>
+    Magnet: ${magnet}<br>
+    Enrollment: ${enroll}
+  `);
   }
 });
 
