@@ -177,7 +177,7 @@ var schoolsLayer = L.esri.featureLayer({
     icon: L.divIcon({
       html: "🏫",
       className: "",
-      iconSize: [10, 10]
+      iconSize: [5, 5]
       })
     });
   },
