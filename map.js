@@ -173,10 +173,12 @@ var schoolsLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/SchoolSites2324/FeatureServer/0',
   attribution: 'California Department of Education',
   pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
     icon: L.divIcon({
       html: "🏫",
       className: "",
       iconSize: [20, 20]
+      })
     });
   },
   onEachFeature: function (feature, layer) {
