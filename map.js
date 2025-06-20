@@ -177,7 +177,7 @@ var schoolsLayer = L.esri.featureLayer({
     icon: L.divIcon({
       html: "🏫",
       className: "",
-      iconSize: [40, 40]
+      iconSize: [90, 90]
       })
     });
   },
@@ -188,7 +188,6 @@ var schoolsLayer = L.esri.featureLayer({
     var name = props.SchoolName || "Unknown School";
     var district = props.DistrictName || "Unknown District";
     var type = props.SchoolType || "N/A";
-    var status = props.StatusType || "N/A";
     var charter = props.Charter === "Y" ? "Yes" : (props.Charter === "N" ? "No" : "N/A");
     var magnet = props.Magnet === "Y" ? "Yes" : (props.Magnet === "N" ? "No" : "N/A");
     var enroll = props.EnrollTotal !== null ? props.EnrollTotal : "N/A";
@@ -196,7 +195,6 @@ var schoolsLayer = L.esri.featureLayer({
     <strong>${name}</strong><br>
     <em>${district}</em><br>
     Type: ${type}<br>
-    Status: ${status}<br>
     Charter: ${charter}<br>
     Magnet: ${magnet}<br>
     Enrollment: ${enroll}
