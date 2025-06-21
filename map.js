@@ -216,10 +216,10 @@ var stateBridgesLayer = L.esri.featureLayer({
     });
   },
   onEachFeature: function(feature, layer) {
-    var props = feature.properties;
-    var popupContent = `<strong>State Highway Bridge</strong><br>
-      <strong>Name:</strong> ${props.NAME || 'N/A'}<br>`;
-    layer.bindPopup(popupContent);
+    var name = feature.properties.NAME || "Unknown Bridge";
+    layer.bindPopup(`
+    <strong>${name}</strong><br>
+  `);
   }
 });
 
@@ -237,10 +237,10 @@ var localBridgesLayer = L.esri.featureLayer({
     });
   },
   onEachFeature: function(feature, layer) {
-    var props = feature.properties;
-    var popupContent = `<strong>Local Bridge</strong><br>
-      <strong>Name:</strong> ${props.NAME || 'N/A'}<br>`;
-    layer.bindPopup(popupContent);
+    var name = feature.properties.NAME || "Unknown Bridge";
+    layer.bindPopup(`
+    <strong>${name}</strong><br>
+  `);
   }
 });
 
