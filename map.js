@@ -156,7 +156,7 @@ var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
   attribution: 'Caltrans',
   style: function () {
-    return { color: '#242424', weight: 4 };
+    return { color: '#242424', weight: 3 };
   }
 })//.addTo(map);
 
@@ -176,9 +176,8 @@ var schoolsLayer = L.esri.featureLayer({
     return L.marker(latlng, {
     icon: L.divIcon({
       html: "🏫",
-      className: "",
-      iconSize: L.point(500, 500),
-      iconAnchor: [5, 5]  // adjust based on visual effect you want
+      className: "school-icon",
+      iconSize: L.point(30, 30),
       })
     });
   },
