@@ -1,4 +1,4 @@
-// map.js - full version with Landslide Raster querying added
+// map.js - full version 
 
 // Initialize the map
 var map = L.map('map').setView([37.5, -119.5], 6);
