@@ -204,6 +204,7 @@ var schoolsLayer = L.esri.featureLayer({
 
 var stateBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
+  attribution: 'Caltrans',
   pointToLayer: function(geojson, latlng) {
     return L.circleMarker(latlng, {
       radius: 5,
@@ -226,6 +227,7 @@ var stateBridgesLayer = L.esri.featureLayer({
 
 var localBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/Local_Bridges/FeatureServer/0",
+  attribution: 'Caltrans',
   pointToLayer: function(geojson, latlng) {
     return L.circleMarker(latlng, {
       radius: 5,
@@ -245,7 +247,6 @@ var localBridgesLayer = L.esri.featureLayer({
     layer.bindPopup(popupContent);
   }
 });
-
 
 // Road layer level zoom logic
 map.on('zoomend', function() {
