@@ -219,10 +219,12 @@ var stateBridgesLayer = L.esri.featureLayer({
   onEachFeature: function(feature, layer) {
     var name = feature.properties.NAME || "Unknown Bridge";
     var yearBuilt = feature.properties.YRBLT || "Unknown Year";
+    var ID = feature.properties.BRIDGE || "N/A";
     layer.bindPopup(`
     <strong>STATE BRIDGE</strong><br>
     Name: ${name}<br>
-    Year Built: ${yearBuilt}
+    Year Built: ${yearBuilt}<br>
+    Bridge ID: ${ID}
   `);
   }
 });
@@ -243,10 +245,12 @@ var localBridgesLayer = L.esri.featureLayer({
   onEachFeature: function(feature, layer) {
     var name = feature.properties.NAME || "Unknown Bridge";
     var yearBuilt = feature.properties.YRBLT || "Unknown Year";
+    var ID = feature.properties.BRIDGE || "N/A";
     layer.bindPopup(`
     <strong>LOCAL BRIDGE</strong><br>
     Name: ${name}<br>
-    Year Built: ${yearBuilt}
+    Year Built: ${yearBuilt}<br>
+    Bridge ID: ${ID}
   `);
   }
 });
