@@ -218,9 +218,7 @@ var stateBridgesLayer = L.esri.featureLayer({
   onEachFeature: function(feature, layer) {
     var props = feature.properties;
     var popupContent = `<strong>State Highway Bridge</strong><br>
-      <strong>Bridge ID:</strong> ${props.BRIDGE_ID || 'N/A'}<br>
-      <strong>Name:</strong> ${props.BRIDGE_NAME || 'N/A'}<br>
-      <strong>Status:</strong> ${props.STATUS || 'N/A'}`;
+      <strong>Name:</strong> ${props.NAME || 'N/A'}<br>`;
     layer.bindPopup(popupContent);
   }
 });
@@ -241,9 +239,7 @@ var localBridgesLayer = L.esri.featureLayer({
   onEachFeature: function(feature, layer) {
     var props = feature.properties;
     var popupContent = `<strong>Local Bridge</strong><br>
-      <strong>Bridge ID:</strong> ${props.BRIDGE_ID || 'N/A'}<br>
-      <strong>Name:</strong> ${props.BRIDGE_NAME || 'N/A'}<br>
-      <strong>Status:</strong> ${props.STATUS || 'N/A'}`;
+      <strong>Name:</strong> ${props.NAME || 'N/A'}<br>`;
     layer.bindPopup(popupContent);
   }
 });
