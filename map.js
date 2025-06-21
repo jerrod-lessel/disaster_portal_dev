@@ -225,7 +225,7 @@ var healthCentLayer = L.esri.featureLayer({
     layer.bindPopup(`
     <strong>HOSPITAL or HEALTH CENTER</strong><br>
     Name: ${name}<br>
-    Status: ${district}<br>
+    Status: ${status}<br>
     Type: ${type}<br>
   `);
   }
