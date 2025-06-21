@@ -250,7 +250,7 @@ var pubAirport = L.esri.featureLayer({
     var classType = props.FNCTNLCLSS || "Unknown Class";
     var ID = props.AIRPORTID || "N/A";
     layer.bindPopup(`
-    <strong>HOSPITAL/HEALTH CENTER</strong><br>
+    <strong>PUBLIC AIRPORTS</strong><br>
     Name: ${name}<br>
     Class: ${classType}<br>
     Airport ID: ${ID}<br>
