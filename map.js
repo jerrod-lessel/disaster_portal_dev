@@ -192,6 +192,7 @@ var schoolsLayer = L.esri.featureLayer({
     var magnet = props.Magnet === "Y" ? "Yes" : (props.Magnet === "N" ? "No" : "N/A");
     var enroll = props.EnrollTotal !== null ? props.EnrollTotal : "N/A";
     layer.bindPopup(`
+    <strong>PUBLIC SCHOOL</strong><br>
     <strong>${name}</strong><br>
     <em>${district}</em><br>
     Type: ${type}<br>
@@ -217,8 +218,11 @@ var stateBridgesLayer = L.esri.featureLayer({
   },
   onEachFeature: function(feature, layer) {
     var name = feature.properties.NAME || "Unknown Bridge";
+    var yearBuilt = feature.properties.YRBLT || "Unknown Year";
     layer.bindPopup(`
-    <strong>State Bridge: ${name}</strong><br>
+    <strong>STATE BRIDGE</strong><br>
+    <strong>${name}</strong><br>
+    Year Built: ${yearBuilt}
   `);
   }
 });
@@ -238,8 +242,11 @@ var localBridgesLayer = L.esri.featureLayer({
   },
   onEachFeature: function(feature, layer) {
     var name = feature.properties.NAME || "Unknown Bridge";
+    var yearBuilt = feature.properties.YRBLT || "Unknown Year";
     layer.bindPopup(`
-    <strong>Local Bridge: ${name}</strong><br>
+    <strong>LOCAL BRIDGE</strong><br>
+    <strong>${name}</strong><br>
+    Year Built: ${yearBuilt}
   `);
   }
 });
