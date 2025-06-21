@@ -208,8 +208,8 @@ var stateBridgesLayer = L.esri.featureLayer({
   pointToLayer: function(geojson, latlng) {
     return L.circleMarker(latlng, {
       radius: 5,
-      fillColor: "#0074D9",  // Blue for state bridges
-      color: "#003366",
+      fillColor: "#636363",  // Charcoal gray for state bridges
+      color: "#252525",
       weight: 1,
       opacity: 1,
       fillOpacity: 0.7
@@ -229,8 +229,8 @@ var localBridgesLayer = L.esri.featureLayer({
   pointToLayer: function(geojson, latlng) {
     return L.circleMarker(latlng, {
       radius: 5,
-      fillColor: "#FF4136",  // Red for local bridges
-      color: "#85144b",
+      fillColor: "#bdbdbd",  // Light grey for local bridges
+      color: "#636363",
       weight: 1,
       opacity: 1,
       fillOpacity: 0.7
