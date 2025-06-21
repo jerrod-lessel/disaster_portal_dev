@@ -320,6 +320,15 @@ map.on("zoomend", function () {
   }
 });
 
+// Health center layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(healthCentLayer)) map.addLayer(healthCentLayer);
+  } else {
+    if (map.hasLayer(healthCentLayer)) map.removeLayer(healthCentLayer);
+  }
+});
+
 // --- Controls ---
 
 // Layer Control
@@ -328,6 +337,8 @@ L.control.layers({ "OpenStreetMap": baseOSM }, {
   "All Roads": allRoadsLayer,
   "State Highway Bridges": stateBridgesLayer,
   "Local Bridges": localBridgesLayer,
+  "Public Schools (K-12)": schoolsLayer,
+  "Hospitals and Health Centers": healthCentLayer,
   "Landslide Susceptibility": landslideLayer,
   "Fire Hazard Zones": fireHazardLayer,
   "Flood Hazard Zones": floodLayer,
@@ -335,7 +346,6 @@ L.control.layers({ "OpenStreetMap": baseOSM }, {
   "Ozone Percentiles": ozoneLayer,
   "PM2.5 Concentration": pmLayer,
   "Water Contaminant Percentile": drinkP_Layer,
-  "Public Schools (K-12)": schoolsLayer,
 }).addTo(map);
 
 // Scale Bar
