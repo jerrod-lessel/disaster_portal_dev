@@ -156,7 +156,7 @@ var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
   attribution: 'Caltrans',
   style: function () {
-    return { color: '#242424', weight: 2 };
+    return { color: '#242424', weight: 4 };
   }
 })//.addTo(map);
 
