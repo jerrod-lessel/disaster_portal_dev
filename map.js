@@ -231,6 +231,33 @@ var healthCentLayer = L.esri.featureLayer({
   }
 });
 
+// Public airports
+var pubAirport = L.esri.featureLayer({
+  url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHaviation/Public_Airport/FeatureServer/0',
+  attribution: 'California Office of Statewide Health Planning and Development',
+  pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
+    icon: L.divIcon({
+      html: "✈️",
+      className: "airport-icon",
+      iconSize: L.point(30, 30),
+      })
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    var props = feature.properties;
+    var name = props.FACILITY || "Unknown Facility";
+    var classType = props.FNCTNLCLSS || "Unknown Class";
+    var ID = props.AIRPORTID || "N/A";
+    layer.bindPopup(`
+    <strong>HOSPITAL/HEALTH CENTER</strong><br>
+    Name: ${name}<br>
+    Class: ${classType}<br>
+    Airport ID: ${ID}<br>
+  `);
+  }
+});
+
 // State bridges
 var stateBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
@@ -333,6 +360,15 @@ map.on("zoomend", function () {
   }
 });
 
+// Public airport layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(pubAirport)) map.addLayer(pubAirport);
+  } else {
+    if (map.hasLayer(pubAirport)) map.removeLayer(pubAirport);
+  }
+});
+
 // --- Controls ---
 
 // Layer Control
@@ -343,6 +379,7 @@ L.control.layers({ "OpenStreetMap": baseOSM }, {
   "Local Bridges": localBridgesLayer,
   "Public Schools (K-12)": schoolsLayer,
   "Hospitals and Health Centers": healthCentLayer,
+  "Public Airports": pubAirport,
   "Landslide Susceptibility": landslideLayer,
   "Fire Hazard Zones": fireHazardLayer,
   "Flood Hazard Zones": floodLayer,
