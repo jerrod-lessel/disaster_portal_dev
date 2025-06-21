@@ -188,6 +188,13 @@ html, body {
   display: none;
 }
 
+.school-icon {
+  font-size: 40px;  /* increase or decrease as desired */
+  text-align: center;
+  line-height: 1;
+}
+
+
 @media (max-width: 768px) {
   #container {
     flex-direction: column;
