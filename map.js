@@ -290,7 +290,7 @@ L.control.layers({ "OpenStreetMap": baseOSM }, {
   "Highway System": highwayLayer,
   "All Roads": allRoadsLayer,
   "State Highway Bridges": stateBridgesLayer,
-  "Local Bridges": localBridgesLayer
+  "Local Bridges": localBridgesLayer,
   "Landslide Susceptibility": landslideLayer,
   "Fire Hazard Zones": fireHazardLayer,
   "Flood Hazard Zones": floodLayer,
