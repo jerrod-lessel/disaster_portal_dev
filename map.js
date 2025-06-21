@@ -203,6 +203,32 @@ var schoolsLayer = L.esri.featureLayer({
   }
 });
 
+var healthCentLayer = L.esri.featureLayer({
+  url: 'https://services5.arcgis.com/fMBfBrOnc6OOzh7V/arcgis/rest/services/facilitylist/FeatureServer/0',
+  attribution: 'California Office of Statewide Health Planning and Development',
+  pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
+    icon: L.divIcon({
+      html: "🏥",
+      className: "healthCent-icon",
+      iconSize: L.point(30, 30),
+      })
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    var props = feature.properties;
+    var name = props.FacilityName || "Unknown Facility";
+    var status = props.FacilityStatus || "Unknown Status";
+    var type = props.LicenseType || "N/A";
+    layer.bindPopup(`
+    <strong>HOSPITAL or HEALTH CENTER</strong><br>
+    Name: ${name}<br>
+    Status: ${district}<br>
+    Type: ${type}<br>
+  `);
+  }
+});
+
 var stateBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
   attribution: 'Caltrans',
