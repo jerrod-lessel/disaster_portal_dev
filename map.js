@@ -177,7 +177,7 @@ var schoolsLayer = L.esri.featureLayer({
     icon: L.divIcon({
       html: "🏫",
       className: "",
-      iconSize: L.point(50, 50),
+      iconSize: L.point(500, 500),
       iconAnchor: [5, 5]  // adjust based on visual effect you want
       })
     });
