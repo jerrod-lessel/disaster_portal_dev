@@ -218,7 +218,7 @@ var stateBridgesLayer = L.esri.featureLayer({
   onEachFeature: function(feature, layer) {
     var name = feature.properties.NAME || "Unknown Bridge";
     layer.bindPopup(`
-    Bridge: <strong>${name}</strong><br>
+    <strong>State Bridge: ${name}</strong><br>
   `);
   }
 });
@@ -239,7 +239,7 @@ var localBridgesLayer = L.esri.featureLayer({
   onEachFeature: function(feature, layer) {
     var name = feature.properties.NAME || "Unknown Bridge";
     layer.bindPopup(`
-    Bridge: <strong>${name}</strong><br>
+    <strong>Local Bridge: ${name}</strong><br>
   `);
   }
 });
