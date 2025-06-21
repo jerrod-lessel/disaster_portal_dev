@@ -223,7 +223,7 @@ var healthCentLayer = L.esri.featureLayer({
     var status = props.FacilityStatus || "Unknown Status";
     var type = props.LicenseType || "N/A";
     layer.bindPopup(`
-    <strong>HOSPITAL or HEALTH CENTER</strong><br>
+    <strong>HOSPITAL/HEALTH CENTER</strong><br>
     Name: ${name}<br>
     Status: ${status}<br>
     Type: ${type}<br>
