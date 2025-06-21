@@ -206,6 +206,12 @@ html, body {
   line-height: 1;
 }
 
+.power-icon {
+  font-size: 32px;  
+  text-align: center;
+  line-height: 1;
+}
+
 @media (max-width: 768px) {
   #container {
     flex-direction: column;
