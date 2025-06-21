@@ -202,6 +202,51 @@ var schoolsLayer = L.esri.featureLayer({
   }
 });
 
+var stateBridgesLayer = L.esri.featureLayer({
+  url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
+  pointToLayer: function(geojson, latlng) {
+    return L.circleMarker(latlng, {
+      radius: 5,
+      fillColor: "#0074D9",  // Blue for state bridges
+      color: "#003366",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.7
+    });
+  },
+  onEachFeature: function(feature, layer) {
+    var props = feature.properties;
+    var popupContent = `<strong>State Highway Bridge</strong><br>
+      <strong>Bridge ID:</strong> ${props.BRIDGE_ID || 'N/A'}<br>
+      <strong>Name:</strong> ${props.BRIDGE_NAME || 'N/A'}<br>
+      <strong>Status:</strong> ${props.STATUS || 'N/A'}`;
+    layer.bindPopup(popupContent);
+  }
+});
+
+var localBridgesLayer = L.esri.featureLayer({
+  url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/Local_Bridges/FeatureServer/0",
+  pointToLayer: function(geojson, latlng) {
+    return L.circleMarker(latlng, {
+      radius: 5,
+      fillColor: "#FF4136",  // Red for local bridges
+      color: "#85144b",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.7
+    });
+  },
+  onEachFeature: function(feature, layer) {
+    var props = feature.properties;
+    var popupContent = `<strong>Local Bridge</strong><br>
+      <strong>Bridge ID:</strong> ${props.BRIDGE_ID || 'N/A'}<br>
+      <strong>Name:</strong> ${props.BRIDGE_NAME || 'N/A'}<br>
+      <strong>Status:</strong> ${props.STATUS || 'N/A'}`;
+    layer.bindPopup(popupContent);
+  }
+});
+
+
 // Road layer level zoom logic
 map.on('zoomend', function() {
   var zoom = map.getZoom();
@@ -223,6 +268,23 @@ map.on("zoomend", function () {
   }
 });
 
+// State bridge layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(stateBridgesLayer)) map.addLayer(stateBridgesLayer);
+  } else {
+    if (map.hasLayer(stateBridgesLayer)) map.removeLayer(stateBridgesLayer);
+  }
+});
+
+// Local bridge layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(localBridgesLayer)) map.addLayer(localBridgesLayer);
+  } else {
+    if (map.hasLayer(localBridgesLayer)) map.removeLayer(localBridgesLayer);
+  }
+});
 
 // --- Controls ---
 
@@ -230,6 +292,8 @@ map.on("zoomend", function () {
 L.control.layers({ "OpenStreetMap": baseOSM }, {
   "Highway System": highwayLayer,
   "All Roads": allRoadsLayer,
+  "State Highway Bridges": stateBridgesLayer,
+  "Local Bridges": localBridgesLayer
   "Landslide Susceptibility": landslideLayer,
   "Fire Hazard Zones": fireHazardLayer,
   "Flood Hazard Zones": floodLayer,
