@@ -258,6 +258,33 @@ var pubAirport = L.esri.featureLayer({
   }
 });
 
+// Power plants
+var powerPlants = L.esri.featureLayer({
+  url: 'https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/Power_Plant/FeatureServer/0',
+  attribution: 'California Energy Commission',
+  pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
+    icon: L.divIcon({
+      html: "⚡",
+      className: "power-icon",
+      iconSize: L.point(30, 30),
+      })
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    var props = feature.properties;
+    var name = props.PlantName || "Unknown Facility";
+    var nrgSource = props.PriEnergySource || "Unknown Energy Source";
+    var cap = props.Capacity_Latest || "Unknown Capacity";
+    layer.bindPopup(`
+    <strong>POWER PLANT</strong><br>
+    Name: ${name}<br>
+    Primary Energy Source: ${nrgSource}<br>
+    Capacity (MW): ${cap}<br>
+  `);
+  }
+});
+
 // State bridges
 var stateBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
@@ -369,6 +396,15 @@ map.on("zoomend", function () {
   }
 });
 
+// Power plant layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(powerPlants)) map.addLayer(powerPlants);
+  } else {
+    if (map.hasLayer(powerPlants)) map.removeLayer(powerPlants);
+  }
+});
+
 // --- Controls ---
 
 // Layer Control
@@ -380,6 +416,7 @@ L.control.layers({ "OpenStreetMap": baseOSM }, {
   "Public Schools (K-12)": schoolsLayer,
   "Hospitals and Health Centers": healthCentLayer,
   "Public Airports": pubAirport,
+  "Power Plants": powerPlants,
   "Landslide Susceptibility": landslideLayer,
   "Fire Hazard Zones": fireHazardLayer,
   "Flood Hazard Zones": floodLayer,
