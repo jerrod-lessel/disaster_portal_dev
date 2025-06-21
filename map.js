@@ -169,6 +169,7 @@ var allRoadsLayer = L.esri.featureLayer({
   }
 })//.addTo(map);
 
+// Public schools 
 var schoolsLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/SchoolSites2324/FeatureServer/0',
   attribution: 'California Department of Education',
@@ -203,6 +204,7 @@ var schoolsLayer = L.esri.featureLayer({
   }
 });
 
+// Hospitals and health centers
 var healthCentLayer = L.esri.featureLayer({
   url: 'https://services5.arcgis.com/fMBfBrOnc6OOzh7V/arcgis/rest/services/facilitylist/FeatureServer/0',
   attribution: 'California Office of Statewide Health Planning and Development',
@@ -229,6 +231,7 @@ var healthCentLayer = L.esri.featureLayer({
   }
 });
 
+// State bridges
 var stateBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
   attribution: 'Caltrans',
@@ -255,6 +258,7 @@ var stateBridgesLayer = L.esri.featureLayer({
   }
 });
 
+// Local bridges
 var localBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/Local_Bridges/FeatureServer/0",
   attribution: 'Caltrans',
