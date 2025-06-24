@@ -408,23 +408,31 @@ map.on("zoomend", function () {
 // --- Controls ---
 
 // Layer Control
-L.control.layers({ "OpenStreetMap": baseOSM }, {
-  "Highway System": highwayLayer,
-  "All Roads": allRoadsLayer,
-  "State Highway Bridges": stateBridgesLayer,
-  "Local Bridges": localBridgesLayer,
-  "Public Schools (K-12)": schoolsLayer,
-  "Hospitals and Health Centers": healthCentLayer,
-  "Public Airports": pubAirport,
-  "Power Plants": powerPlants,
-  "Landslide Susceptibility": landslideLayer,
-  "Fire Hazard Zones": fireHazardLayer,
-  "Flood Hazard Zones": floodLayer,
-  "Shaking Potential": shakingLayer,
-  "Ozone Percentiles": ozoneLayer,
-  "PM2.5 Concentration": pmLayer,
-  "Water Contaminant Percentile": drinkP_Layer,
-}).addTo(map);
+L.control.layers(
+{ "OpenStreetMap": baseOSM },  // Base layer
+  {
+    // Infrastructure
+    "<strong>Infrastructure</strong><br>Schools": schoolsLayer,
+    "Hospitals": healthCentLayer,
+    "Power Plants": powerPlants,
+    "Airports": pubAirport,
+    "Highway System": highwayLayer,
+    "All Roads": allRoadsLayer,
+    "State Bridges": stateBridgesLayer,
+    "Local Bridges": localBridgesLayer,
+
+    // Hazards
+    "<strong>Hazards</strong><br>Fire Hazard Zones": fireHazardLayer,
+    "Flood Hazard Zones": floodLayer,
+    "Landslide Susceptibility": landslideLayer,
+    "Shaking Potential": shakingLayer,
+
+    // Health
+    "<strong>Health</strong><br>Ozone Percentiles": ozoneLayer,
+    "PM2.5 Concentration": pmLayer,
+    "Water Quality": drinkP_Layer
+  }
+).addTo(map);
 
 // Scale Bar
 L.control.scale({ imperial: true }).addTo(map);
