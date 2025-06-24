@@ -412,7 +412,8 @@ L.control.layers(
 { "OpenStreetMap": baseOSM },  // Base layer
   {
     // Infrastructure
-    "<strong>Infrastructure</strong><br>Schools": schoolsLayer,
+    "<strong>Infrastructure</strong><br>"
+    "Schools": schoolsLayer,
     "Hospitals": healthCentLayer,
     "Power Plants": powerPlants,
     "Airports": pubAirport,
@@ -422,13 +423,15 @@ L.control.layers(
     "Local Bridges": localBridgesLayer,
 
     // Hazards
-    "<strong>Hazards</strong><br>Fire Hazard Zones": fireHazardLayer,
+    "<strong>Hazards</strong><br>"
+    "Fire Hazard Zones": fireHazardLayer,
     "Flood Hazard Zones": floodLayer,
     "Landslide Susceptibility": landslideLayer,
     "Shaking Potential": shakingLayer,
 
     // Health
-    "<strong>Health</strong><br>Ozone Percentiles": ozoneLayer,
+    "<strong>Health</strong><br>"
+    "Ozone Percentiles": ozoneLayer,
     "PM2.5 Concentration": pmLayer,
     "Water Quality": drinkP_Layer
   }
