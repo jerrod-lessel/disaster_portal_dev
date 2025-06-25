@@ -7,10 +7,19 @@ setTimeout(() => {
   map.invalidateSize();
 }, 200);
 
-// Base Layer
+// Base Layer Options
 var baseOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
+const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Tiles &copy; Esri'
+});
+const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; Carto'
+});
+const stamenTerrain = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg', {
+  attribution: 'Map tiles by Stamen Design'
+});
 
 // Marker for clicked location
 var clickMarker = null;
@@ -409,7 +418,10 @@ map.on("zoomend", function () {
 
 // Layer Control
 L.control.layers(
-{ "OpenStreetMap": baseOSM },  // Base layer
+{ "OpenStreetMap": baseOSM,
+  "Esri Satellite": esriSat,
+  "Carto Dark": cartoDark,
+  "Stamen Terrain": stamenTerrain},  // Base layer
   {
     // Infrastructure
     "Schools": schoolsLayer,
