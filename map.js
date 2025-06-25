@@ -20,9 +20,6 @@ const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/
 const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; Carto'
 });
-const stamenToner = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
-  attribution: 'Map tiles by Stamen Design'
-});
 
 // Marker for clicked location
 var clickMarker = null;
@@ -424,8 +421,7 @@ L.control.layers(
 { "OpenStreetMap": baseOSM,
   "Esri Satellite": esriSat,
   "Carto Light": cartoLight,
-  "Carto Dark": cartoDark,
-  "Stamen Toner": stamenToner},  // Base layer
+  "Carto Dark": cartoDark},  // Base layer
   {
     // Infrastructure
     "Schools": schoolsLayer,
