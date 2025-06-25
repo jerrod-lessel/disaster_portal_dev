@@ -14,10 +14,13 @@ var baseOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
 const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri'
 });
+const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; Carto'
+});
 const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; Carto'
 });
-const stamenTerrain = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg', {
+const stamenToner = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
   attribution: 'Map tiles by Stamen Design'
 });
 
@@ -420,8 +423,9 @@ map.on("zoomend", function () {
 L.control.layers(
 { "OpenStreetMap": baseOSM,
   "Esri Satellite": esriSat,
+  "Carto Light": cartoLight,
   "Carto Dark": cartoDark,
-  "Stamen Terrain": stamenTerrain},  // Base layer
+  "Stamen Toner": stamenToner},  // Base layer
   {
     // Infrastructure
     "Schools": schoolsLayer,
