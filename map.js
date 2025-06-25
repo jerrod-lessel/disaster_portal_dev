@@ -453,7 +453,7 @@ L.control.scale({ imperial: true }).addTo(map);
 var homeButton = L.control({ position: 'topleft' });
 homeButton.onAdd = function(map) {
   var button = L.DomUtil.create('button', 'home-button');
-  button.innerHTML = '🏠';
+  button.innerHTML = '⌂';
   button.title = 'Reset View';
   button.onclick = function () {
     map.setView([37.5, -119.5], 6);
@@ -467,7 +467,7 @@ homeButton.addTo(map);
 var legendToggle = L.control({ position: 'topright' });
 legendToggle.onAdd = () => {
   var div = L.DomUtil.create('div', 'map-widget leaflet-control leaflet-bar');
-  div.innerHTML = `<a href="#" id="legend-toggle" title="Show/Hide Legend">🗺️</a>`;
+  div.innerHTML = `<a href="#" id="legend-toggle" title="Show/Hide Legend">≡</a>`;
   L.DomEvent.disableClickPropagation(div);
   return div;
 };
