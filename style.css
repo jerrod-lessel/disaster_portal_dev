@@ -128,14 +128,17 @@ html, body {
   box-shadow: 0 1px 5px rgba(0,0,0,0.65);
   width: 43px;
   height: 43px;
-  font-size: 18px;
-  line-height: 30px;
-  text-align: center;
   color: black;
   cursor: pointer;
+
+  /* Perfect centering trick */
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* Emoji styling */
+  font-size: 22px;
+  line-height: 1;
   padding: 0;
 }
 
