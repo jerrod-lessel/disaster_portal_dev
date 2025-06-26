@@ -137,7 +137,7 @@ html, body {
   justify-content: center;
 
   /* Nudge up and left using transform */
-  transform: translate(-3px, -3px);
+  /*transform: translate(-3px, -3px);*/
 
   /* Emoji styling */
   font-size: 26px;
