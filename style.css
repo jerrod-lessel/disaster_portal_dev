@@ -349,3 +349,21 @@ html, body {
 #about-toggle:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
+
+.legend-button {
+  width: 43px;
+  height: 43px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 43px;
+  text-align: center;
+  color: black;
+  position: absolute;
+  top: 10px;
+  left: 55px; /* adjust as needed to not collide with other buttons */
+  z-index: 1001;
+}
