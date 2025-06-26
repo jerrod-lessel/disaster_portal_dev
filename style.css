@@ -131,16 +131,20 @@ html, body {
   color: black;
   cursor: pointer;
 
-  /* Perfect centering trick */
+  /* Perfect centering trick with manual nudges */
   display: flex;
   align-items: center;
   justify-content: center;
 
+  /* Nudge up and left using transform */
+  transform: translate(-3px, -3px);
+
   /* Emoji styling */
-  font-size: 22px;
+  font-size: 26px;
   line-height: 1;
   padding: 0;
 }
+
 
 .map-widget:hover {
   background-color: #f4f4f4;
