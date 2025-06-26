@@ -122,16 +122,32 @@ html, body {
 }
 
 .map-widget {
-  background-color: white;
+  background-color: #fff;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  cursor: pointer;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  line-height: 30px;
   text-align: center;
-  width: 28px;
-  height: 28px;
-  line-height: 28px;
-  font-size: 16px;
   color: black;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-widget:hover {
+  background-color: #f4f4f4;
+}
+
+#home-button, #legend-toggle {
+  position: absolute;
+  top: 10px;       /* adjust if needed */
+  left: 10px;      /* or right: 10px depending on layout */
+  z-index: 1001;
+  margin-bottom: 5px;
 }
 
 .legend-panel {
