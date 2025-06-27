@@ -345,7 +345,6 @@ html, body {
   transform: translateY(-1px);
 }
 
-
 #about-toggle:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
@@ -366,4 +365,15 @@ html, body {
   top: 10px;
   left: 55px; /* adjust as needed to not collide with other buttons */
   z-index: 1001;
+}
+
+.legend-icon {
+  font-size: 30px;           /* Makes the emoji larger */
+  line-height: 1;            /* Prevents vertical misalignment */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: translate(-1px, -1px); /* Nudge slightly left and up */
 }
