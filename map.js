@@ -449,6 +449,28 @@ L.control.layers(
 // Scale Bar
 L.control.scale({ imperial: true }).addTo(map);
 
+// Legend Button
+const LegendControl = L.Control.extend({
+  options: { position: 'topright' },
+
+  onAdd: function (map) {
+    const container = L.DomUtil.create('div', 'leaflet-bar custom-legend-button');
+    container.innerHTML = '<span class="legend-icon">☰</span>';
+    container.title = 'Toggle Legend';
+
+    container.onclick = function () {
+      const legendBox = document.getElementById('legend-box');
+      legendBox.classList.toggle('hidden');
+    };
+
+    // Prevent map drag when clicking the button
+    L.DomEvent.disableClickPropagation(container);
+    return container;
+  }
+});
+
+map.addControl(new LegendControl());
+
 // Home Button
 var homeButton = L.control({ position: 'topleft' });
 homeButton.onAdd = function(map) {
