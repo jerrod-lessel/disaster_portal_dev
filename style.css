@@ -170,7 +170,7 @@ html, body {
 }
 
 .custom-legend-button .legend-icon {
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1;
   transform: translateY(-1px); /* fine-tune vertically */
 }
