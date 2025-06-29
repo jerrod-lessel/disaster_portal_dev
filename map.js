@@ -749,26 +749,5 @@ The drinking water contaminant percentile is <strong>${pct}</strong>, meaning it
     );
   }
 });
-
-const LegendControl = L.Control.extend({
-  options: { position: 'topright' },
-
-  onAdd: function (map) {
-    const container = L.DomUtil.create('div', 'leaflet-bar custom-legend-button');
-    container.innerHTML = '<span class="legend-icon">☰</span>';
-    container.title = 'Toggle Legend';
-
-    container.onclick = function () {
-      const legendBox = document.getElementById('legend-box');
-      legendBox.classList.toggle('hidden');
-    };
-
-    L.DomEvent.disableClickPropagation(container);
-    return container;
-  }
-});
-
-map.addControl(new LegendControl());
-
   
 }); 
