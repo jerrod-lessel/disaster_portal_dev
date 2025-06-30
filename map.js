@@ -463,7 +463,7 @@ homeButton.onAdd = function(map) {
 };
 homeButton.addTo(map);
 
-
+/*
 // Legend Button
 const LegendControl = L.Control.extend({
   options: { position: 'topright' },
@@ -483,19 +483,27 @@ const LegendControl = L.Control.extend({
     return container;
   }
 });
+*/
 
-map.addControl(new LegendControl());
-
-/*
 // Legend Toggle
-var legendToggle = L.control({ position: 'topright' });
-legendToggle.onAdd = () => {
-  var div = L.DomUtil.create('div', 'map-widget leaflet-control leaflet-bar');
-  div.innerHTML = `<a href="#" id="legend-toggle" title="Show/Hide Legend">≡</a>`;
-  L.DomEvent.disableClickPropagation(div);
-  return div;
-};
-legendToggle.addTo(map);
+map.addControl(new LegendControl());
+const LegendToggleControl = L.Control.extend({
+  options: { position: 'topright' },
+  onAdd: function (map) {
+    const container = L.DomUtil.create('div', 'leaflet-bar custom-legend-button');
+    container.innerHTML = '<span class="legend-icon">☰</span>';
+    container.title = 'Toggle Legend';
+    container.onclick = function () {
+      const legendPanels = document.getElementsByClassName('legend-panel');
+      for (const panel of legendPanels) {
+        panel.classList.toggle('hidden');
+      }
+    };
+    L.DomEvent.disableClickPropagation(container);
+    return container;
+  }
+});
+map.addControl(new LegendToggleControl());
 
 var legendPanel = L.control({ position: 'topright' });
 legendPanel.onAdd = () => {
@@ -579,7 +587,6 @@ legendPanel.onAdd = () => {
   return div;
 };
 legendPanel.addTo(map);
-*/
 
 // Legend Scroll Wheel Fix
 document.addEventListener('DOMContentLoaded', function () {
