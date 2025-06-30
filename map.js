@@ -449,7 +449,21 @@ L.control.layers(
 // Scale Bar
 L.control.scale({ imperial: true }).addTo(map);
 
-/*
+// Home Button
+var homeButton = L.control({ position: 'topleft' });
+homeButton.onAdd = function(map) {
+  var button = L.DomUtil.create('button', 'home-button');
+  button.innerHTML = '⌂';
+  button.title = 'Reset View';
+  button.onclick = function () {
+    map.setView([37.5, -119.5], 6);
+  };
+  L.DomEvent.disableClickPropagation(button);
+  return button;
+};
+homeButton.addTo(map);
+
+
 // Legend Button
 const LegendControl = L.Control.extend({
   options: { position: 'topright' },
@@ -471,22 +485,8 @@ const LegendControl = L.Control.extend({
 });
 
 map.addControl(new LegendControl());
-*/
 
-// Home Button
-var homeButton = L.control({ position: 'topleft' });
-homeButton.onAdd = function(map) {
-  var button = L.DomUtil.create('button', 'home-button');
-  button.innerHTML = '⌂';
-  button.title = 'Reset View';
-  button.onclick = function () {
-    map.setView([37.5, -119.5], 6);
-  };
-  L.DomEvent.disableClickPropagation(button);
-  return button;
-};
-homeButton.addTo(map);
-
+/*
 // Legend Toggle
 var legendToggle = L.control({ position: 'topright' });
 legendToggle.onAdd = () => {
@@ -579,6 +579,7 @@ legendPanel.onAdd = () => {
   return div;
 };
 legendPanel.addTo(map);
+*/
 
 // Legend Scroll Wheel Fix
 document.addEventListener('DOMContentLoaded', function () {
