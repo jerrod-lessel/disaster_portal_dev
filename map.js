@@ -486,7 +486,7 @@ const LegendControl = L.Control.extend({
 */
 
 // Legend Toggle
-map.addControl(new LegendControl());
+/*map.addControl(new LegendControl());*/
 const LegendToggleControl = L.Control.extend({
   options: { position: 'topright' },
   onAdd: function (map) {
