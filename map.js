@@ -463,30 +463,7 @@ homeButton.onAdd = function(map) {
 };
 homeButton.addTo(map);
 
-/*
-// Legend Button
-const LegendControl = L.Control.extend({
-  options: { position: 'topright' },
-
-  onAdd: function (map) {
-    const container = L.DomUtil.create('div', 'leaflet-bar custom-legend-button');
-    container.innerHTML = '<span class="legend-icon">☰</span>';
-    container.title = 'Toggle Legend';
-
-    container.onclick = function () {
-      const legendBox = document.getElementById('legend-box');
-      legendBox.classList.toggle('hidden');
-    };
-
-    // Prevent map drag when clicking the button
-    L.DomEvent.disableClickPropagation(container);
-    return container;
-  }
-});
-*/
-
 // Legend Toggle
-/*map.addControl(new LegendControl());*/
 const LegendToggleControl = L.Control.extend({
   options: { position: 'topright' },
   onAdd: function (map) {
