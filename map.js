@@ -486,7 +486,7 @@ var legendPanel = L.control({ position: 'topright' });
 legendPanel.onAdd = () => {
   var div = L.DomUtil.create('div', 'legend-panel hidden');
   div.innerHTML = `
-    <h1>Legends</h1>
+    <h2>Legends</h2>
     <div class="legend-section">
       <strong>Fire Hazard Zones</strong>
       <div><i style="background:#d7191c;"></i> Very High</div>
