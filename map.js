@@ -449,6 +449,7 @@ L.control.layers(
 // Scale Bar
 L.control.scale({ imperial: true }).addTo(map);
 
+/*
 // Legend Button
 const LegendControl = L.Control.extend({
   options: { position: 'topright' },
@@ -470,6 +471,7 @@ const LegendControl = L.Control.extend({
 });
 
 map.addControl(new LegendControl());
+*/
 
 // Home Button
 var homeButton = L.control({ position: 'topleft' });
