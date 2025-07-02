@@ -207,7 +207,7 @@ html, body {
   overscroll-behavior: contain; 
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 1rem;
+  padding-bottom: 3rem;
 }
 
 .legend-panel h4 {
