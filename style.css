@@ -197,7 +197,7 @@ html, body {
   padding: 10px;
   border: 2px solid #000;
   border-radius: 4px;
-  max-height: 300px;
+  max-height: 70vh/*300px;*/
   overflow-y: auto;
   width: 250px;
   font-size: 0.9rem;
@@ -207,7 +207,7 @@ html, body {
   overscroll-behavior: contain; 
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 3rem;
+  padding-bottom: 1rem;
 }
 
 .legend-panel h4 {
@@ -274,7 +274,7 @@ html, body {
   text-align: center;
   line-height: 1;
 }
-
+/*
 @media (max-width: 768px) {
   #container {
     flex-direction: column;
@@ -288,7 +288,28 @@ html, body {
   }
 
   #map {
-    height: calc(100vh - 80px - 300px); /* Banner + sidebar height */
+    height: calc(100vh - 80px - 300px); 
+  }
+}
+*/
+
+@media (max-width: 768px) {
+  #container {
+    flex-direction: column;
+    height: calc(100vh - 80px); /* reserve room for banner */
+  }
+
+  #sidebar {
+    width: 100%;
+    flex: 0 0 35%;   /* 35% height for the sidebar */
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.75rem;
+  }
+
+  #map {
+    flex: 1 1 auto;  /* map takes remaining space */
+    height: auto;
   }
 }
 
