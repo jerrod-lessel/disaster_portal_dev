@@ -189,7 +189,7 @@ html, body {
 .custom-legend-button .legend-icon {
   font-size: 28px;
   line-height: 1;
-  transform: translateY(-1px); /* fine-tune vertically */
+  transform: translateY(-2px);
 }
 
 .legend-panel {
