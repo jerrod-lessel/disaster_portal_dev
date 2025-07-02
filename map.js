@@ -452,7 +452,7 @@ L.control.scale({ imperial: true }).addTo(map);
 // Home Button
 var homeButton = L.control({ position: 'topleft' });
 homeButton.onAdd = function(map) {
-  var button = L.DomUtil.create('div', 'map-widget leaflet-control leaflet-bar');
+  var button = L.DomUtil.create('div', 'home-button leaflet-control leaflet-bar');
   button.innerHTML = `<a href="#" id="home-button" title="Home"><span class="legend-icon">⌂</span></a>`;
   button.title = 'Reset View';
   button.onclick = function () {
