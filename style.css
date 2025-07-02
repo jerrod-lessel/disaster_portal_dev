@@ -206,6 +206,7 @@ html, body {
   touch-action: auto;
   overscroll-behavior: contain; 
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .legend-panel h4 {
