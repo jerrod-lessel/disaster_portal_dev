@@ -197,7 +197,7 @@ html, body {
   padding: 10px;
   border: 2px solid #000;
   border-radius: 4px;
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
   width: 250px;
   font-size: 0.9rem;
@@ -207,6 +207,7 @@ html, body {
   overscroll-behavior: contain; 
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: 1rem;
 }
 
 .legend-panel h4 {
