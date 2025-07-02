@@ -486,6 +486,19 @@ map.addControl(new LegendToggleControl());
 var legendPanel = L.control({ position: 'topright' });
 legendPanel.onAdd = () => {
   var div = L.DomUtil.create('div', 'legend-panel hidden');
+  
+  div.addEventListener('touchstart', function(e) {
+  e.stopPropagation();
+  }, { passive: false });
+
+  div.addEventListener('touchmove', function(e) {
+  e.stopPropagation();
+  }, { passive: false });
+
+  div.addEventListener('wheel', function(e) {
+  e.stopPropagation();
+  }, { passive: false });
+  
   div.innerHTML = `
     <h2>Legends</h2>
     <div class="legend-section">
