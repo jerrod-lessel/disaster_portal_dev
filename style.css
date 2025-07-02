@@ -155,8 +155,6 @@ html, body {
 */
 
 #home-button .legend-icon {
-  width: 20px;
-  height: 20px;
   font-size: 30px;
   line-height: 1;
   display: flex;
@@ -166,7 +164,6 @@ html, body {
   height: 100%;
   transform: translate(-1px, -1px); /* same nudge */
 }
-
 
 .custom-legend-button {
   width: 43px;
