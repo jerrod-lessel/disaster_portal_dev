@@ -458,6 +458,7 @@ homeButton.onAdd = function(map) {
   button.onclick = function () {
     map.setView([37.5, -119.5], 6);
   };
+  L.DomEvent.disableScrollPropagation(button);
   L.DomEvent.disableClickPropagation(button);
   return button;
 };
