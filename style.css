@@ -3,10 +3,8 @@ html, body {
   padding: 0;
   height: 100%;
   font-family: Arial, sans-serif;
-  overflow: hidden; /* Prevent page scroll */
-  /*height: 100vh;*/
+  overflow: hidden; 
   background-color: black;
-  /*overflow-y: hidden;*/
 }
 
 #top-banner {
