@@ -311,10 +311,9 @@ var evChargers = L.esri.featureLayer({
     var props = feature.properties;
     var id = props.ID || "Unknown ID";
     var city = props.City || "Unknown City";
-    var l1_chargers = props.L1_evse || "No L1 Chargers";
-    var l2_chargers = props.L2_evse || "No L2 Chargers";
-    var dc_chargers = props.DCFC || "No DC Fast Chargers";
-    var charger_type = props.Charger_Type || "Unknown Charger Type";
+    var l1_chargers = props.L1_evse || "None";
+    var l2_chargers = props.L2_evse || "None";
+    var dc_chargers = props.DCFC || "None";
     layer.bindPopup(`
     <strong>EV Charger</strong><br>
     ID: ${id}<br>
@@ -322,7 +321,6 @@ var evChargers = L.esri.featureLayer({
     L1 Chargers: ${l1_chargers}<br>
     L2 Chargers: ${l2_chargers}<br>
     DC Fast Chargers: ${dc_chargers}<br>
-    Charger Type: ${charger_type}<br>
   `);
   }
 });
