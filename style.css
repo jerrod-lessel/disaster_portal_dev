@@ -276,6 +276,12 @@ html, body {
   line-height: 1;
 }
 
+.evcharger-icon {
+  font-size: 27px;  
+  text-align: center;
+  line-height: 1;
+}
+
 @media (max-width: 768px) {
   #container {
     flex-direction: column;
