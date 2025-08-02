@@ -294,6 +294,39 @@ var powerPlants = L.esri.featureLayer({
   }
 });
 
+// EV Chargers
+var evChargers = L.esri.featureLayer({
+  url: 'https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/public_chargers_afdc_20250313/FeatureServer/0',
+  attribution: 'California Energy Commission',
+  pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
+    icon: L.divIcon({
+      html: "🔋",
+      className: "evcharger-icon",
+      iconSize: L.point(30, 30),
+      })
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    var props = feature.properties;
+    var id = props.ID || "Unknown ID";
+    var city = props.City || "Unknown City";
+    var l1_chargers = props.L1_evse || "No L1 Chargers";
+    var l2_chargers = props.L2_evse || "No L2 Chargers";
+    var dc_chargers = props.DCFC || "No DC Fast Chargers";
+    var charger_type = props.Charger_Type || "Unknown Charger Type";
+    layer.bindPopup(`
+    <strong>EV Charger</strong><br>
+    ID: ${id}<br>
+    City: ${city}<br>
+    L1 Chargers: ${l1_chargers}<br>
+    L2 Chargers: ${l2_chargers}<br>
+    DC Fast Chargers: ${dc_chargers}<br>
+    Charger Type: ${charger_type}<br>
+  `);
+  }
+});
+
 // State bridges
 var stateBridgesLayer = L.esri.featureLayer({
   url: "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
@@ -414,6 +447,15 @@ map.on("zoomend", function () {
   }
 });
 
+// EV Charger layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(evChargers)) map.addLayer(evChargers);
+  } else {
+    if (map.hasLayer(evChargers)) map.removeLayer(evChargers);
+  }
+});
+
 // --- Controls ---
 
 // Layer Control
@@ -432,6 +474,7 @@ L.control.layers(
     "All Roads": allRoadsLayer,
     "State Bridges": stateBridgesLayer,
     "Local Bridges": localBridgesLayer,
+    "EV Chargers": evChargers,
 
     // Hazards
     "Fire Hazard Zones": fireHazardLayer,
