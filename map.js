@@ -341,7 +341,7 @@ function getChargersInView() {
           const status = charger.StatusType?.Title ?? 'Unknown Status';
           const usage = charger.UsageType?.Title ?? 'Usage details not specified';
           const network = charger.OperatorInfo?.Title ?? 'Unknown Network';
-          const numPoints = charger.Connections.Quantity ?? 'N/A';
+          const numPoints = charger.Connections.ConnectionTypeID ?? 'N/A';
 
           // Equipment Details (we'll grab info from the first connection)
           let equipmentInfo = '<li>No equipment details</li>';
