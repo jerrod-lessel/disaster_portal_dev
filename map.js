@@ -304,7 +304,7 @@ const evChargersLayer = L.layerGroup();
 const OCM_API_KEY = '166f53f4-5ccd-4fae-92fe-e03a24423a7b';
 
 // 3. The API URL to get all chargers in California
-const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&countrycode=US&stateorprovince=California&maxresults=20000&key=${OCM_API_KEY}`;
+const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&countrycode=US&stateorprovince=CA&maxresults=20000&key=${OCM_API_KEY}`;
 
 // 4. Fetch the data and process it
 fetch(ocmUrl)
