@@ -349,7 +349,7 @@ function getChargersInView() {
             equipmentInfo = charger.Connections.map(conn => `
               <li>
                 <strong>${conn.ConnectionType?.Title ?? 'Connector'}</strong>: 
-                ${conn.PowerKW ?? 'N/A'} kW (${conn.Level?.Title ?? 'Level info unavailable'})
+                ${conn.PowerKW ?? 'N/A'} kW ${conn.Voltage ?? 'N/A'} V ${conn.Amps ?? 'N/A'} A (${conn.Level?.Title ?? 'Level info unavailable'})
               </li>
             `).join('');
           }
