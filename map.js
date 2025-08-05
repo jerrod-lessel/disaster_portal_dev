@@ -295,35 +295,66 @@ var powerPlants = L.esri.featureLayer({
 });
 
 // EV Chargers
-var evChargers = L.esri.featureLayer({
-  url: 'https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/public_chargers_afdc_20250313/FeatureServer/0',
-  attribution: 'California Energy Commission',
-  pointToLayer: function (geojson, latlng) {
-    return L.marker(latlng, {
-    icon: L.divIcon({
-      html: "🔋",
-      className: "evcharger-icon",
-      iconSize: L.point(30, 30),
-      })
+// --- OpenChargeMap EV Charger Layer ---
+
+// 1. Create a layer group to hold our EV charger markers. This will be our new layer.
+const evChargersLayer = L.layerGroup();
+
+// 2. Your API Key from OpenChargeMap
+const OCM_API_KEY = '166f53f4-5ccd-4fae-92fe-e03a24423a7b';
+
+// 3. The API URL to get all chargers in California
+const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&countrycode=US&statename=California&maxresults=2000&key=${OCM_API_KEY}`;
+
+// 4. Fetch the data and process it
+fetch(ocmUrl)
+  .then(response => response.json()) // Parse the JSON from the response
+  .then(data => {
+    // Loop through each charger in the data array
+    data.forEach(charger => {
+      // Ensure the charger has location data
+      if (charger.AddressInfo && charger.AddressInfo.Latitude && charger.AddressInfo.Longitude) {
+
+        // Create a marker for each charger
+        const marker = L.marker([charger.AddressInfo.Latitude, charger.AddressInfo.Longitude], {
+          icon: L.divIcon({
+            html: "🔋",
+            className: "evcharger-icon", // Use the same CSS class you already have!
+            iconSize: L.point(30, 30),
+          })
+        });
+
+        // Create the content for the popup
+        const props = charger.AddressInfo;
+        const connections = charger.Connections;
+        
+        let connectionInfo = 'No connection details available.';
+        if (connections && connections.length > 0) {
+            // Just show the type of the first connection for simplicity
+            connectionInfo = `Type: ${connections[0].ConnectionType.Title || 'N/A'}<br>
+                              Power: ${connections[0].PowerKW || 'N/A'} kW`;
+        }
+
+        const popupContent = `
+          <strong>EV Charger</strong><br>
+          <strong>${props.Title || 'Unknown Location'}</strong><br>
+          Address: ${props.AddressLine1 || ''}<br>
+          City: ${props.Town || ''}<br>
+          Connections: ${charger.NumberOfPoints || 'N/A'}<br>
+          ${connectionInfo}
+        `;
+        
+        marker.bindPopup(popupContent);
+
+        // Add the marker to our layer group
+        marker.addTo(evChargersLayer);
+      }
     });
-  },
-  onEachFeature: function (feature, layer) {
-    var props = feature.properties;
-    var id = props.ID || "Unknown ID";
-    var city = props.City || "Unknown City";
-    var l1_chargers = props.L1_evse || "None";
-    var l2_chargers = props.L2_evse || "None";
-    var dc_chargers = props.DCFC || "None";
-    layer.bindPopup(`
-    <strong>EV Charger</strong><br>
-    ID: ${id}<br>
-    City: ${city}<br>
-    L1 Chargers: ${l1_chargers}<br>
-    L2 Chargers: ${l2_chargers}<br>
-    DC Fast Chargers: ${dc_chargers}<br>
-  `);
-  }
-});
+    console.log('Successfully loaded EV chargers from OpenChargeMap!');
+  })
+  .catch(error => {
+    console.error('Error fetching OpenChargeMap data:', error);
+  });
 
 // State bridges
 var stateBridgesLayer = L.esri.featureLayer({
@@ -448,9 +479,9 @@ map.on("zoomend", function () {
 // EV Charger layer level zoom logic
 map.on("zoomend", function () {
   if (map.getZoom() >= 14) {
-    if (!map.hasLayer(evChargers)) map.addLayer(evChargers);
+    if (!map.hasLayer(evChargersLayer)) map.addLayer(evChargersLayer);
   } else {
-    if (map.hasLayer(evChargers)) map.removeLayer(evChargers);
+    if (map.hasLayer(evChargersLayer)) map.removeLayer(evChargersLayer);
   }
 });
 
@@ -472,7 +503,7 @@ L.control.layers(
     "All Roads": allRoadsLayer,
     "State Bridges": stateBridgesLayer,
     "Local Bridges": localBridgesLayer,
-    "EV Chargers": evChargers,
+    "EV Chargers": evChargersLayer,
 
     // Hazards
     "Fire Hazard Zones": fireHazardLayer,
