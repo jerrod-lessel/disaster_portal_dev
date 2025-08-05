@@ -1,4 +1,4 @@
-// map.js - full version 
+ // map.js - full version 
 
 // Initialize the map
 var map = L.map('map').setView([37.5, -119.5], 6);
@@ -299,7 +299,7 @@ var powerPlants = L.esri.featureLayer({
 
 // Create a layer group to hold our markers. The attribution is included here.
 const evChargersLayer = L.layerGroup(null, {
-  attribution: 'Data from <a href="https://openchargemap.org/site">OpenChargeMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>'
+  attribution: '<a href="https://openchargemap.org/site">OpenChargeMap</a>'
 });
 
 // Your API Key from OpenChargeMap
