@@ -161,37 +161,33 @@ var shakingLayer = L.esri.dynamicMapLayer({
 })//.addTo(map);
 
 // Live CAL FIRE Active Incidents Layer
+// --- Live CAL FIRE Active Incidents Layer ---
+
 // 1. Create a layer group to hold the fire incident markers
 const calFireLayer = L.layerGroup();
 const CALFIRE_ATTRIBUTION = '<a href="https://www.fire.ca.gov/incidents" target="_blank">Active Incidents: CAL FIRE</a>';
 
-// 2. The URL for the CAL FIRE live GeoJSON feed
-const calFireUrl = 'https://www.fire.ca.gov/umbraco/api/IncidentApi/List';
+// 2. The URL for the CAL FIRE feed, now routed through a CORS proxy
+const calFireUrl = 'https://api.allorigins.win/raw?url=https://www.fire.ca.gov/umbraco/api/IncidentApi/List';
 
 // 3. Fetch the data and process it
 fetch(calFireUrl)
   .then(response => response.json())
   .then(data => {
-    // The actual incidents are inside the "Incidents" property of the response
     const incidents = data.Incidents;
 
     incidents.forEach(incident => {
-      // We only want to map incidents that have valid coordinates
       if (incident.Latitude && incident.Longitude) {
-
-        // Create a marker with a fire emoji icon
         const marker = L.marker([incident.Latitude, incident.Longitude], {
           icon: L.divIcon({
             html: "🔥",
-            className: 'fire-icon', // We can add custom CSS later if we want
+            className: 'fire-icon',
             iconSize: L.point(30, 30),
           })
         });
 
-        // Format the acres for better readability
         const acresBurned = incident.AcresBurned ? incident.AcresBurned.toLocaleString() : "N/A";
 
-        // Build the popup content with all the key details
         const popupContent = `
           <strong>${incident.Name}</strong><br>
           <hr>
@@ -204,8 +200,6 @@ fetch(calFireUrl)
         `;
         
         marker.bindPopup(popupContent);
-
-        // Add the new marker to our layer group
         marker.addTo(calFireLayer);
       }
     });
