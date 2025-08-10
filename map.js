@@ -569,6 +569,23 @@ map.on("zoomend", function () {
 
 // --- Controls ---
 
+// --- Attribution Logic for All Layers ---
+map.on('overlayadd', function(e) {
+  if (e.layer === evChargersLayer) {
+    this.attributionControl.addAttribution(OCM_ATTRIBUTION);
+  } else if (e.layer === calFireLayer) {
+    this.attributionControl.addAttribution(CALFIRE_ATTRIBUTION);
+  }
+});
+
+map.on('overlayremove', function(e) {
+  if (e.layer === evChargersLayer) {
+    this.attributionControl.removeAttribution(OCM_ATTRIBUTION);
+  } else if (e.layer === calFireLayer) {
+    this.attributionControl.removeAttribution(CALFIRE_ATTRIBUTION);
+  }
+});
+
 // Layer Control
 L.control.layers(
 { "OpenStreetMap": baseOSM,
