@@ -306,8 +306,6 @@ function getChargersInView() {
     if (isLoadingChargers) return;
     isLoadingChargers = true;
 
-    const bounds = map.getBounds();
-
     // Instead of getting bounds from the map, we define a static box for California.
     const caliBounds = {
         sw: { lat: 32.5342, lon: -124.4106 }, // South, West
@@ -316,7 +314,7 @@ function getChargersInView() {
 
     // Construct the URL using our new static bounding box
     const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&boundingbox=(${caliBounds.sw.lat},${caliBounds.sw.lon}),(${caliBounds.ne.lat},${caliBounds.ne.lon})&maxresults=10000&key=${OCM_API_KEY}`;
- 
+    const bounds = map.getBounds();
     fetch(ocmUrl)
         .then(response => response.json())
         .then(data => {
