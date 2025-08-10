@@ -294,117 +294,6 @@ var powerPlants = L.esri.featureLayer({
   }
 });
 
-/*
-// EV Chargers
-// --- OpenChargeMap EV Charger Layer (Dynamic Loading & Rich Popups) ---
-
-// Create a layer group to hold our markers. The attribution is included here.
-const evChargersLayer = L.layerGroup(null, {
-  attribution: '<a href="https://openchargemap.org/site">OpenChargeMap</a>'
-});
-
-// Your API Key from OpenChargeMap
-const OCM_API_KEY = '166f53f4-5ccd-4fae-92fe-e03a24423a7b';
-
-// We will add a simple flag to prevent multiple requests from firing at once
-let isLoadingChargers = false;
-
-// This is our main function to fetch and display chargers
-function getChargersInView() {
-  // If a request is already in progress, don't start another one
-  if (isLoadingChargers) return; 
-  isLoadingChargers = true; // Set the flag
-
-  // 1. Get the current map boundaries to define our query area
-  const bounds = map.getBounds();
-  const northEast = bounds.getNorthEast();
-  const southWest = bounds.getSouthWest();
-
-  // 2. Format the bounds for the API URL
-  const boundingBox = `(${southWest.lat},${southWest.lng}),(${northEast.lat},${northEast.lng})`;
-
-  // 3. Construct the API URL with the *dynamic* bounding box
-  const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&boundingbox=${boundingBox}&maxresults=500&key=${OCM_API_KEY}`;
-
-  // 4. Fetch the data
-  fetch(ocmUrl)
-    .then(response => response.json())
-    .then(data => {
-      // IMPORTANT: Clear out old markers before adding new ones
-      evChargersLayer.clearLayers();
-
-      data.forEach(charger => {
-        if (charger.AddressInfo && charger.AddressInfo.Latitude && charger.AddressInfo.Longitude) {
-          
-          // --- Start: Enhanced Data Extraction ---
-          
-          // Operational Status & Usage Type
-          const status = charger.StatusType?.Title ?? 'Unknown Status';
-          const usage = charger.UsageType?.Title ?? 'Usage details not specified';
-          const network = charger.OperatorInfo?.Title ?? 'Unknown Network';
-          const numPoints = charger.NumberOfPoints?.Title ?? '0';
-
-          // Equipment Details (we'll grab info from the first connection)
-          let equipmentInfo = '<li>No equipment details</li>';
-          if (charger.Connections && charger.Connections.length > 0) {
-            equipmentInfo = charger.Connections.map(conn => `
-              <li>
-                <strong>${conn.ConnectionType?.Title ?? 'Connector'}</strong>: 
-                <br> ${conn.PowerKW ?? 'N/A'} kW <br> ${conn.Voltage ?? 'N/A'} V <br> ${conn.Amps ?? 'N/A'} A <br> (${conn.Level?.Title ?? 'Level info unavailable'})
-              </li>
-            `).join('');
-          }
-          
-          // --- End: Enhanced Data Extraction ---
-
-          // Create the marker (no changes here)
-          const marker = L.marker([charger.AddressInfo.Latitude, charger.AddressInfo.Longitude], {
-            icon: L.divIcon({
-              html: "🔋",
-              className: "evcharger-icon",
-              iconSize: L.point(30, 30),
-            })
-          });
-
-          // Build the new, much richer popup content
-          const popupContent = `
-            <strong>${charger.AddressInfo.Title}</strong><br>
-            <hr>
-            <strong>Status:</strong> ${status} (${usage})<br>
-            <strong>Network:</strong> ${network}<br>
-            <strong>Charging Ports:</strong> ${numPoints}<br>
-            <br>
-            <strong>Equipment:</strong>
-            <ul>${equipmentInfo}</ul>
-          `;
-          
-          marker.bindPopup(popupContent);
-          marker.addTo(evChargersLayer);
-        }
-      });
-      
-      // Reset the flag when the process is complete
-      isLoadingChargers = false; 
-    })
-    .catch(error => {
-      console.error('Error fetching OpenChargeMap data:', error);
-      isLoadingChargers = false; // Also reset the flag on error
-    });
-}
-
-// 5. Add the layer to the map so it appears in the layer control
-// We don't add it directly to the map here, but let the user toggle it
-// Note: If you want it to be visible by default, uncomment the next line
-// evChargersLayer.addTo(map);
-
-// 6. Set up the event listeners
-// This tells the map to call our function whenever the user stops moving the map
-map.on('moveend', getChargersInView);
-
-// 7. Call the function once on initial page load to populate the first view
-getChargersInView();
-*/
-
 // --- OpenChargeMap EV Charger Layer (FINAL CORRECTED VERSION) ---
 
 const evChargersLayer = L.layerGroup(); // Create a simple layer group
@@ -420,6 +309,15 @@ function getChargersInView() {
     const bounds = map.getBounds();
     const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&boundingbox=(${bounds.getSouthWest().lat},${bounds.getSouthWest().lng}),(${bounds.getNorthEast().lat},${bounds.getNorthEast().lng})&maxresults=500&key=${OCM_API_KEY}`;
 
+    // Instead of getting bounds from the map, we define a static box for California.
+    const caliBounds = {
+        sw: { lat: 32.5342, lon: -124.4106 }, // South, West
+        ne: { lat: 42.0097, lon: -114.1345 }  // North, East
+    };
+
+    // Construct the URL using our new static bounding box
+    const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&boundingbox=(${caliBounds.sw.lat},${caliBounds.sw.lon}),(${caliBounds.ne.lat},${caliBounds.ne.lon})&maxresults=10000&key=${OCM_API_KEY}`;
+ 
     fetch(ocmUrl)
         .then(response => response.json())
         .then(data => {
