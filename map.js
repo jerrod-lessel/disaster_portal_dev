@@ -307,7 +307,6 @@ function getChargersInView() {
     isLoadingChargers = true;
 
     const bounds = map.getBounds();
-    const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&boundingbox=(${bounds.getSouthWest().lat},${bounds.getSouthWest().lng}),(${bounds.getNorthEast().lat},${bounds.getNorthEast().lng})&maxresults=500&key=${OCM_API_KEY}`;
 
     // Instead of getting bounds from the map, we define a static box for California.
     const caliBounds = {
@@ -326,7 +325,6 @@ function getChargersInView() {
             data.forEach(charger => {
                 if (charger.AddressInfo && charger.AddressInfo.Latitude && charger.AddressInfo.Longitude) {
 
-                    // --- START: FIX #1 - CALCULATE TOTAL PORTS ---
                     let totalPorts = 0;
                     if (charger.Connections && charger.Connections.length > 0) {
                         // Loop through each connection type at the location
@@ -335,7 +333,6 @@ function getChargersInView() {
                             totalPorts += connection.Quantity || 1; 
                         });
                     }
-                    // --- END: FIX #1 ---
 
                     const status = charger.StatusType?.Title ?? 'Unknown Status';
                     const usage = charger.UsageType?.Title ?? 'Usage details not specified';
@@ -383,7 +380,6 @@ function getChargersInView() {
 map.on('moveend', getChargersInView);
 getChargersInView();
 
-// --- START: FIX #2 - ATTRIBUTION LOGIC ---
 // Listen for when layers are added or removed from the map's layer control
 map.on('overlayadd', function(e) {
     // If the layer being added is our EV charger layer...
@@ -400,7 +396,6 @@ map.on('overlayremove', function(e) {
         this.attributionControl.removeAttribution(OCM_ATTRIBUTION);
     }
 });
-// --- END: FIX #2 ---
 
 // State bridges
 var stateBridgesLayer = L.esri.featureLayer({
