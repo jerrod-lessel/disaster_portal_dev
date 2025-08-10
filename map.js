@@ -170,53 +170,35 @@ const CALFIRE_ATTRIBUTION = '<a href="https://www.fire.ca.gov/incidents" target=
 // 2. The URL for the CAL FIRE feed, now routed through a CORS proxy
 const calFireUrl = 'https://api.allorigins.win/raw?url=https://www.fire.ca.gov/umbraco/api/IncidentApi/List';
 
-// 3. Fetch the data and process it
+// 3. Replace your current Cal Fire fetch block with this one
 fetch(calFireUrl)
-  .then(response => response.json()) // This first .then() parses the proxy's container
+  .then(response => response.json()) // This gets the proxy's container object
   .then(data => {
     
     // --- THIS IS THE FIX ---
-    // The real data is a string inside the 'contents' property. 
-    // We need to parse that string to get the actual JSON object from CAL FIRE.
+    // The real data is a string inside 'contents'. We must parse it again.
     const calFireData = JSON.parse(data.contents); 
     const incidents = calFireData.Incidents;
     // --- END OF FIX ---
 
+    // The rest of the function processes the now-correct 'incidents' variable
     incidents.forEach(incident => {
-      // We only want to map incidents that have valid coordinates
       if (incident.Latitude && incident.Longitude) {
-
-        // Create a marker with a fire emoji icon
         const marker = L.marker([incident.Latitude, incident.Longitude], {
-          icon: L.divIcon({
-            html: "🔥",
-            className: 'fire-icon', // We can add custom CSS later if we want
-            iconSize: L.point(30, 30),
-          })
+          icon: L.divIcon({ html: "🔥", className: 'fire-icon', iconSize: L.point(30, 30) })
         });
-
-        // Format the acres for better readability
         const acresBurned = incident.AcresBurned ? incident.AcresBurned.toLocaleString() : "N/A";
-
-        // Build the popup content with all the key details
         const popupContent = `
-          <strong>${incident.Name}</strong><br>
-          <hr>
+          <strong>${incident.Name}</strong><br><hr>
           <strong>Status:</strong> ${incident.Status || 'N/A'}<br>
           <strong>Acres Burned:</strong> ${acresBurned}<br>
           <strong>County:</strong> ${incident.County || 'N/A'}<br>
-          <strong>Location:</strong> ${incident.Location || 'N/A'}<br>
-          <br>
+          <strong>Location:</strong> ${incident.Location || 'N/A'}<br><br>
           <a href="${incident.Url}" target="_blank">More Info (CAL FIRE)</a>
         `;
-        
-        marker.bindPopup(popupContent);
-
-        // Add the new marker to our layer group
-        marker.addTo(calFireLayer);
+        marker.bindPopup(popupContent).addTo(calFireLayer);
       }
     });
-
     console.log(`Successfully loaded ${incidents.length} active incidents from CAL FIRE!`);
   })
   .catch(error => {
