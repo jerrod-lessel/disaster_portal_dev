@@ -298,7 +298,7 @@ var powerPlants = L.esri.featureLayer({
 
 const evChargersLayer = L.layerGroup(); // Create a simple layer group
 const OCM_API_KEY = '166f53f4-5ccd-4fae-92fe-e03a24423a7b';
-const OCM_ATTRIBUTION = 'Data from <a href="https://openchargemap.org/site">OpenChargeMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>';
+const OCM_ATTRIBUTION = '<a href="https://openchargemap.org/site">OpenChargeMap</a>';
 
 let isLoadingChargers = false;
 
