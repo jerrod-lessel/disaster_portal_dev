@@ -172,22 +172,33 @@ const calFireUrl = 'https://api.allorigins.win/raw?url=https://www.fire.ca.gov/u
 
 // 3. Fetch the data and process it
 fetch(calFireUrl)
-  .then(response => response.json())
+  .then(response => response.json()) // This first .then() parses the proxy's container
   .then(data => {
-    const incidents = data.Incidents;
+    
+    // --- THIS IS THE FIX ---
+    // The real data is a string inside the 'contents' property. 
+    // We need to parse that string to get the actual JSON object from CAL FIRE.
+    const calFireData = JSON.parse(data.contents); 
+    const incidents = calFireData.Incidents;
+    // --- END OF FIX ---
 
     incidents.forEach(incident => {
+      // We only want to map incidents that have valid coordinates
       if (incident.Latitude && incident.Longitude) {
+
+        // Create a marker with a fire emoji icon
         const marker = L.marker([incident.Latitude, incident.Longitude], {
           icon: L.divIcon({
             html: "🔥",
-            className: 'fire-icon',
+            className: 'fire-icon', // We can add custom CSS later if we want
             iconSize: L.point(30, 30),
           })
         });
 
+        // Format the acres for better readability
         const acresBurned = incident.AcresBurned ? incident.AcresBurned.toLocaleString() : "N/A";
 
+        // Build the popup content with all the key details
         const popupContent = `
           <strong>${incident.Name}</strong><br>
           <hr>
@@ -200,6 +211,8 @@ fetch(calFireUrl)
         `;
         
         marker.bindPopup(popupContent);
+
+        // Add the new marker to our layer group
         marker.addTo(calFireLayer);
       }
     });
