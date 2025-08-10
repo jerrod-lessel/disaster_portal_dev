@@ -160,6 +160,62 @@ var shakingLayer = L.esri.dynamicMapLayer({
   opacity: 0.6
 })//.addTo(map);
 
+// Live CAL FIRE Active Incidents Layer
+// 1. Create a layer group to hold the fire incident markers
+const calFireLayer = L.layerGroup();
+const CALFIRE_ATTRIBUTION = '<a href="https://www.fire.ca.gov/incidents" target="_blank">Active Incidents: CAL FIRE</a>';
+
+// 2. The URL for the CAL FIRE live GeoJSON feed
+const calFireUrl = 'https://www.fire.ca.gov/umbraco/api/IncidentApi/List';
+
+// 3. Fetch the data and process it
+fetch(calFireUrl)
+  .then(response => response.json())
+  .then(data => {
+    // The actual incidents are inside the "Incidents" property of the response
+    const incidents = data.Incidents;
+
+    incidents.forEach(incident => {
+      // We only want to map incidents that have valid coordinates
+      if (incident.Latitude && incident.Longitude) {
+
+        // Create a marker with a fire emoji icon
+        const marker = L.marker([incident.Latitude, incident.Longitude], {
+          icon: L.divIcon({
+            html: "🔥",
+            className: 'fire-icon', // We can add custom CSS later if we want
+            iconSize: L.point(30, 30),
+          })
+        });
+
+        // Format the acres for better readability
+        const acresBurned = incident.AcresBurned ? incident.AcresBurned.toLocaleString() : "N/A";
+
+        // Build the popup content with all the key details
+        const popupContent = `
+          <strong>${incident.Name}</strong><br>
+          <hr>
+          <strong>Status:</strong> ${incident.Status || 'N/A'}<br>
+          <strong>Acres Burned:</strong> ${acresBurned}<br>
+          <strong>County:</strong> ${incident.County || 'N/A'}<br>
+          <strong>Location:</strong> ${incident.Location || 'N/A'}<br>
+          <br>
+          <a href="${incident.Url}" target="_blank">More Info (CAL FIRE)</a>
+        `;
+        
+        marker.bindPopup(popupContent);
+
+        // Add the new marker to our layer group
+        marker.addTo(calFireLayer);
+      }
+    });
+
+    console.log(`Successfully loaded ${incidents.length} active incidents from CAL FIRE!`);
+  })
+  .catch(error => {
+    console.error('Error fetching CAL FIRE data:', error);
+  });
+
 // Caltrans National Highway System (visible at zoom <= 10)
 var highwayLayer = L.esri.featureLayer({
   url: 'https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/National_Highway_System/MapServer/0',
@@ -294,8 +350,7 @@ var powerPlants = L.esri.featureLayer({
   }
 });
 
-// --- OpenChargeMap EV Charger Layer (FINAL CORRECTED VERSION) ---
-
+// OpenChargeMap EV Chargers
 const evChargersLayer = L.layerGroup(); // Create a simple layer group
 const OCM_API_KEY = '166f53f4-5ccd-4fae-92fe-e03a24423a7b';
 const OCM_ATTRIBUTION = '<a href="https://openchargemap.org/site">OpenChargeMap</a>';
@@ -543,6 +598,7 @@ L.control.layers(
     "Flood Hazard Zones": floodLayer,
     "Landslide Susceptibility": landslideLayer,
     "Shaking Potential": shakingLayer,
+    "Active Fires": calFireLayer,
 
     // Health
     "Ozone Percentiles": ozoneLayer,
