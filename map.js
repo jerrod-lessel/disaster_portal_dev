@@ -305,9 +305,17 @@ let isLoadingChargers = false;
 function getChargersInView() {
     if (isLoadingChargers) return;
     isLoadingChargers = true;
-
+/*
     const bounds = map.getBounds();
     const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&boundingbox=(${bounds.getSouthWest().lat},${bounds.getSouthWest().lng}),(${bounds.getNorthEast().lat},${bounds.getNorthEast().lng})&maxresults=5000&key=${OCM_API_KEY}`;
+ */
+    const caliBounds = {
+           sw: { lat: 32.5342, lon: -124.4106 }, // South, West
+           ne: { lat: 42.0097, lon: -114.1345 }  // North, East
+    };
+
+    // Construct the URL using our static bounding box. I've increased maxresults to ensure we get everything.
+    const ocmUrl = `https://api.openchargemap.io/v3/poi/?output=json&boundingbox=(${caliBounds.sw.lat},${caliBounds.sw.lon}),(${caliBounds.ne.lat},${caliBounds.ne.lon})&maxresults=10000&key=${OCM_API_KEY}`;
     
     fetch(ocmUrl)
         .then(response => response.json())
