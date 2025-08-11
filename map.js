@@ -180,21 +180,19 @@ var calFireLayer = L.esri.featureLayer({
 
   onEachFeature: function(feature, layer) {
     const props = feature.properties;
-    
-    // --- START OF UPGRADED POPUP LOGIC ---
 
     // 1. Improved Acres Burned: Use CalculatedAcres, but fall back to DiscoveryAcres.
     const bestAcreage = props.CalculatedAcres || props.DiscoveryAcres;
     const acres = (bestAcreage && bestAcreage > 0) ? Math.round(bestAcreage).toLocaleString() : 'N/A';
-      
-    // 2. Add Percent Contained (default to 0 if null)
-    const contained = props.PercentContained ?? 0;
     
-    // 3. Add Last Updated Date (using a more detailed format)
+    // Add Percent Contained (default to 0 if null)
+    const contained = props.PercentContained ?? 0;
+  
+    // Add Last Updated Date (using a more detailed format)
     const updated = new Date(props.ModifiedOnDateTime_dt).toLocaleString();
 
     const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString();
-    
+  
     // Build the new, more detailed popup content
     const popupContent = `
       <strong>${props.IncidentName || 'Unknown Fire'}</strong><hr>
@@ -203,8 +201,6 @@ var calFireLayer = L.esri.featureLayer({
       <strong>Discovered:</strong> ${discovered}<br>
       <strong>Last Updated:</strong> ${updated}
     `;
-
-    // --- END OF UPGRADED POPUP LOGIC ---
 
     layer.bindPopup(popupContent);
   }
