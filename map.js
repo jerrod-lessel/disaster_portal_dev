@@ -160,13 +160,13 @@ var shakingLayer = L.esri.dynamicMapLayer({
   opacity: 0.6
 })//.addTo(map);
 
-// Live Wildfire Incidents Layer (from ArcGIS Living Atlas)
+// Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC)
 var calFireLayer = L.esri.featureLayer({
-  // This is the URL for the reliable, public ArcGIS Living Atlas layer
-  url: 'https://www.arcgis.com/home/item.html?id=df8bcc10430f48878b01c96e907a1fc3',
-  // We can filter the data directly in the query to only show active fires in CA
-  where: "IrwinState = 'CA' AND PercentContained < 100",
-  attribution: 'ArcGIS Living Atlas',
+  // This is the current, correct, and public URL for live wildfire data from NIFC
+  url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0',
+  // We can filter the data directly in the query to only show fires in California
+  where: "POOState = 'US-CA'",
+  attribution: 'National Interagency Fire Center',
 
   // Use pointToLayer to style our points with an emoji
   pointToLayer: function (geojson, latlng) {
@@ -185,13 +185,12 @@ var calFireLayer = L.esri.featureLayer({
     
     // Format the acres and date for better readability
     const acres = props.CalculatedAcres ? Math.round(props.CalculatedAcres).toLocaleString() : 'N/A';
-    const discovered = new Date(props.DiscoveryDate).toLocaleDateString();
+    const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString();
     
     // Build the popup content
     const popupContent = `
       <strong>${props.IncidentName || 'Unknown Fire'}</strong><br><hr>
       <strong>Acres Burned:</strong> ${acres}<br>
-      <strong>Percent Contained:</strong> ${props.PercentContained || 0}%<br>
       <strong>Discovered:</strong> ${discovered}
     `;
 
