@@ -184,9 +184,8 @@ var calFireLayer = L.esri.featureLayer({
     // --- START OF UPGRADED POPUP LOGIC ---
 
     // 1. Improved Acres Burned: Use CalculatedAcres, but fall back to DiscoveryAcres.
-    const acres = (props.CalculatedAcres || props.DiscoveryAcres) 
-      ? Math.round(props.CalculatedAcres || props.DiscoveryAcres).toLocaleString() 
-      : 'N/A';
+    const bestAcreage = props.CalculatedAcres || props.DiscoveryAcres;
+    const acres = (bestAcreage && bestAcreage > 0) ? Math.round(bestAcreage).toLocaleString() : 'N/A';
       
     // 2. Add Percent Contained (default to 0 if null)
     const contained = props.PercentContained ?? 0;
