@@ -160,15 +160,14 @@ var shakingLayer = L.esri.dynamicMapLayer({
   opacity: 0.6
 })//.addTo(map);
 
-// Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC)
+// --- Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC) ---
 var calFireLayer = L.esri.featureLayer({
-  // This is the current, correct, and public URL for live wildfire data from NIFC
+  // This is the URL for the reliable, public ArcGIS Living Atlas layer
   url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0',
-  // We can filter the data directly in the query to only show fires in California
+  // Filter for incidents only in California
   where: "POOState = 'US-CA'",
   attribution: 'National Interagency Fire Center',
 
-  // Use pointToLayer to style our points with an emoji
   pointToLayer: function (geojson, latlng) {
     return L.marker(latlng, {
       icon: L.divIcon({
@@ -179,20 +178,34 @@ var calFireLayer = L.esri.featureLayer({
     });
   },
 
-  // Use onEachFeature to create the popups
   onEachFeature: function(feature, layer) {
     const props = feature.properties;
     
-    // Format the acres and date for better readability
-    const acres = props.CalculatedAcres ? Math.round(props.CalculatedAcres).toLocaleString() : 'N/A';
+    // --- START OF UPGRADED POPUP LOGIC ---
+
+    // 1. Improved Acres Burned: Use CalculatedAcres, but fall back to DiscoveryAcres.
+    const acres = (props.CalculatedAcres || props.DiscoveryAcres) 
+      ? Math.round(props.CalculatedAcres || props.DiscoveryAcres).toLocaleString() 
+      : 'N/A';
+      
+    // 2. Add Percent Contained (default to 0 if null)
+    const contained = props.PercentContained ?? 0;
+    
+    // 3. Add Last Updated Date (using a more detailed format)
+    const updated = new Date(props.ModifiedOnDateTime_dt).toLocaleString();
+
     const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString();
     
-    // Build the popup content
+    // Build the new, more detailed popup content
     const popupContent = `
-      <strong>${props.IncidentName || 'Unknown Fire'}</strong><br><hr>
+      <strong>${props.IncidentName || 'Unknown Fire'}</strong><hr>
       <strong>Acres Burned:</strong> ${acres}<br>
-      <strong>Discovered:</strong> ${discovered}
+      <strong>Percent Contained:</strong> ${contained}%<br>
+      <strong>Discovered:</strong> ${discovered}<br>
+      <strong>Last Updated:</strong> ${updated}
     `;
+
+    // --- END OF UPGRADED POPUP LOGIC ---
 
     layer.bindPopup(popupContent);
   }
