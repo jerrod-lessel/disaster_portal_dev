@@ -175,10 +175,12 @@ fetch(calFireUrl)
   .then(response => response.json()) // This gets the proxy's container object
   .then(data => {
     
-    // --- THIS IS THE FIX ---
-    // The real data is a string inside 'contents'. We must parse it again.
+    // The proxy wraps the real data in a 'contents' property. We parse it.
     const calFireData = JSON.parse(data.contents); 
-    const incidents = calFireData.Incidents;
+    
+    // --- THIS IS THE ONE-LINE FIX ---
+    // The API now returns an array directly, so we use it. No more .Incidents
+    const incidents = calFireData; 
     // --- END OF FIX ---
 
     // The rest of the function processes the now-correct 'incidents' variable
