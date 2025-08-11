@@ -163,7 +163,7 @@ var shakingLayer = L.esri.dynamicMapLayer({
 // Live Wildfire Incidents Layer (from ArcGIS Living Atlas)
 var calFireLayer = L.esri.featureLayer({
   // This is the URL for the reliable, public ArcGIS Living Atlas layer
-  url: 'https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/USA_Wildfire_Activity/FeatureServer/0',
+  url: 'https://www.arcgis.com/home/item.html?id=df8bcc10430f48878b01c96e907a1fc3',
   // We can filter the data directly in the query to only show active fires in CA
   where: "IrwinState = 'CA' AND PercentContained < 100",
   attribution: 'ArcGIS Living Atlas',
