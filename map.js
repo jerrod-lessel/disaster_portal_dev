@@ -160,52 +160,47 @@ var shakingLayer = L.esri.dynamicMapLayer({
   opacity: 0.6
 })//.addTo(map);
 
-// Live CAL FIRE Active Incidents Layer
-// --- Live CAL FIRE Active Incidents Layer ---
+// Live Wildfire Incidents Layer
+var calFireLayer = L.esri.featureLayer({
+  // This is the URL for the NIFC's public, live wildfire data service
+  url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/CY_WildlandFire_Locations_ToDate/FeatureServer/0',
+  // Filter for incidents only in California
+  where: "POOState = 'US-CA'",
+  // The plugin handles attribution automatically
+  attribution: 'National Interagency Fire Center (NIFC)',
 
-// 1. Create a layer group to hold the fire incident markers
-const calFireLayer = L.layerGroup();
-const CALFIRE_ATTRIBUTION = '<a href="https://www.fire.ca.gov/incidents" target="_blank">Active Incidents: CAL FIRE</a>';
-
-// 2. The URL for the CAL FIRE feed, now routed through a CORS proxy
-const calFireUrl = 'https://api.allorigins.win/raw?url=https://www.fire.ca.gov/umbraco/api/IncidentApi/List';
-
-// 3. Replace your current Cal Fire fetch block with this one
-fetch(calFireUrl)
-  .then(response => response.json()) // This gets the proxy's container object
-  .then(data => {
-    
-    // The proxy wraps the real data in a 'contents' property. We parse it.
-    const calFireData = JSON.parse(data.contents); 
-    
-    // --- THIS IS THE ONE-LINE FIX ---
-    // The API now returns an array directly, so we use it. No more .Incidents
-    const incidents = calFireData; 
-    // --- END OF FIX ---
-
-    // The rest of the function processes the now-correct 'incidents' variable
-    incidents.forEach(incident => {
-      if (incident.Latitude && incident.Longitude) {
-        const marker = L.marker([incident.Latitude, incident.Longitude], {
-          icon: L.divIcon({ html: "🔥", className: 'fire-icon', iconSize: L.point(30, 30) })
-        });
-        const acresBurned = incident.AcresBurned ? incident.AcresBurned.toLocaleString() : "N/A";
-        const popupContent = `
-          <strong>${incident.Name}</strong><br><hr>
-          <strong>Status:</strong> ${incident.Status || 'N/A'}<br>
-          <strong>Acres Burned:</strong> ${acresBurned}<br>
-          <strong>County:</strong> ${incident.County || 'N/A'}<br>
-          <strong>Location:</strong> ${incident.Location || 'N/A'}<br><br>
-          <a href="${incident.Url}" target="_blank">More Info (CAL FIRE)</a>
-        `;
-        marker.bindPopup(popupContent).addTo(calFireLayer);
-      }
+  // Use pointToLayer to style our points with an emoji
+  pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
+      icon: L.divIcon({
+        html: "🔥",
+        className: 'fire-icon',
+        iconSize: L.point(30, 30)
+      })
     });
-    console.log(`Successfully loaded ${incidents.length} active incidents from CAL FIRE!`);
-  })
-  .catch(error => {
-    console.error('Error fetching CAL FIRE data:', error);
-  });
+  },
+
+  // Use onEachFeature to create the popups
+  onEachFeature: function(feature, layer) {
+    const props = feature.properties;
+    
+    // Format the acres and date for better readability
+    const acres = props.CalculatedAcres ? Math.round(props.CalculatedAcres).toLocaleString() : 'N/A';
+    const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString();
+    
+    // Build the popup content
+    const popupContent = `
+      <strong>${props.IncidentName || 'Unknown Fire'}</strong><br><hr>
+      <strong>Status:</strong> ${props.IncidentTypeCategory || 'N/A'}<br>
+      <strong>Acres Burned:</strong> ${acres}<br>
+      <strong>Discovered:</strong> ${discovered}<br>
+      <br>
+      <a href="${props.IRWIN_Narrative_URL || '#'}" target="_blank">More Info</a>
+    `;
+
+    layer.bindPopup(popupContent);
+  }
+});
 
 // Caltrans National Highway System (visible at zoom <= 10)
 var highwayLayer = L.esri.featureLayer({
@@ -565,24 +560,6 @@ map.on("zoomend", function () {
 });
 
 // --- Controls ---
-
-// --- Attribution Logic for All Layers ---
-map.on('overlayadd', function(e) {
-  if (e.layer === evChargersLayer) {
-    this.attributionControl.addAttribution(OCM_ATTRIBUTION);
-  } else if (e.layer === calFireLayer) {
-    this.attributionControl.addAttribution(CALFIRE_ATTRIBUTION);
-  }
-});
-
-map.on('overlayremove', function(e) {
-  if (e.layer === evChargersLayer) {
-    this.attributionControl.removeAttribution(OCM_ATTRIBUTION);
-  } else if (e.layer === calFireLayer) {
-    this.attributionControl.removeAttribution(CALFIRE_ATTRIBUTION);
-  }
-});
-
 // Layer Control
 L.control.layers(
 { "OpenStreetMap": baseOSM,
