@@ -160,14 +160,13 @@ var shakingLayer = L.esri.dynamicMapLayer({
   opacity: 0.6
 })//.addTo(map);
 
-// Live Wildfire Incidents Layer
+// Live Wildfire Incidents Layer (from ArcGIS Living Atlas)
 var calFireLayer = L.esri.featureLayer({
-  // This is the URL for the NIFC's public, live wildfire data service
-  url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/CY_WildlandFire_Locations_ToDate/FeatureServer/0',
-  // Filter for incidents only in California
-  where: "POOState = 'US-CA'",
-  // The plugin handles attribution automatically
-  attribution: 'National Interagency Fire Center (NIFC)',
+  // This is the URL for the reliable, public ArcGIS Living Atlas layer
+  url: 'https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/USA_Wildfire_Activity/FeatureServer/0',
+  // We can filter the data directly in the query to only show active fires in CA
+  where: "IrwinState = 'CA' AND PercentContained < 100",
+  attribution: 'ArcGIS Living Atlas',
 
   // Use pointToLayer to style our points with an emoji
   pointToLayer: function (geojson, latlng) {
@@ -186,16 +185,14 @@ var calFireLayer = L.esri.featureLayer({
     
     // Format the acres and date for better readability
     const acres = props.CalculatedAcres ? Math.round(props.CalculatedAcres).toLocaleString() : 'N/A';
-    const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString();
+    const discovered = new Date(props.DiscoveryDate).toLocaleDateString();
     
     // Build the popup content
     const popupContent = `
       <strong>${props.IncidentName || 'Unknown Fire'}</strong><br><hr>
-      <strong>Status:</strong> ${props.IncidentTypeCategory || 'N/A'}<br>
       <strong>Acres Burned:</strong> ${acres}<br>
-      <strong>Discovered:</strong> ${discovered}<br>
-      <br>
-      <a href="${props.IRWIN_Narrative_URL || '#'}" target="_blank">More Info</a>
+      <strong>Percent Contained:</strong> ${props.PercentContained || 0}%<br>
+      <strong>Discovered:</strong> ${discovered}
     `;
 
     layer.bindPopup(popupContent);
