@@ -179,20 +179,13 @@ var calFireLayer = L.esri.featureLayer({
   },
 
   onEachFeature: function(feature, layer) {
-    console.log("Fire Properties:", feature.properties); 
+    // console.log("Fire Properties:", feature.properties); // Use for finding property names
     const props = feature.properties;
 
-    // 1. Improved Acres Burned: Use CalculatedAcres, but fall back to DiscoveryAcres.
-    const bestAcreage = props.CalculatedAcres || props.DiscoveryAcres;
-    const acres = (bestAcreage && bestAcreage > 0) ? Math.round(bestAcreage).toLocaleString() : 'N/A';
-    
-    // Add Percent Contained (default to 0 if null)
-    const contained = props.PercentContained ?? 0;
-  
-    // Add Last Updated Date (using a more detailed format)
-    const updated = new Date(props.ModifiedOnDateTime_dt).toLocaleString();
-
-    const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString();
+    const acres = (props.IncidentSize && props.IncidentSize > 0) ? Math.round(props.IncidentSize).toLocaleString() : 'N/A';
+    const contained = props.PercentContained ?? 0; // The name for Percent Contained
+    const updated = new Date(props.ModifiedOnDateTime_dt).toLocaleString(); // The name for Last Updated
+    const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString(); // This one was already working
   
     // Build the new, more detailed popup content
     const popupContent = `
