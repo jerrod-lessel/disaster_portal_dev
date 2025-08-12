@@ -609,6 +609,15 @@ map.on("zoomend", function () {
   }
 });
 
+// Universities layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(universitiesLayer)) map.addLayer(universitiesLayer);
+  } else {
+    if (map.hasLayer(universitiesLayer)) map.removeLayer(universitiesLayer);
+  }
+});
+
 // --- Controls ---
 // Layer Control
 L.control.layers(
