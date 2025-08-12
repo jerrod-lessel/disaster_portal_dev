@@ -486,7 +486,6 @@ var fireStationsLayer = L.esri.featureLayer({
       <strong>${props.NAME || 'Unknown Station'}</strong><hr>
       <strong>Address:</strong> ${props.ADDRESS || 'N/A'}<br>
       <strong>City:</strong> ${props.CITY || 'N/A'}<br>
-      <strong>County:</strong> ${props.COUNTY || 'N/A'}
     `;
 
     layer.bindPopup(popupContent);
@@ -645,6 +644,15 @@ map.on("zoomend", function () {
     if (!map.hasLayer(universitiesLayer)) map.addLayer(universitiesLayer);
   } else {
     if (map.hasLayer(universitiesLayer)) map.removeLayer(universitiesLayer);
+  }
+});
+
+// Fire stations layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(fireStationsLayer)) map.addLayer(fireStationsLayer);
+  } else {
+    if (map.hasLayer(fireStationsLayer)) map.removeLayer(fireStationsLayer);
   }
 });
 
