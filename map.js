@@ -463,6 +463,35 @@ var universitiesLayer = L.esri.featureLayer({
 map.on('moveend', getChargersInView);
 getChargersInView();
 
+// --- Fire Stations Layer (Using Your Verified CalOES Source) ---
+var fireStationsLayer = L.esri.featureLayer({
+  url: 'https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Structures_Medical_Emergency_Response_v1/FeatureServer/2',
+  attribution: 'Esri Federal Data/NGDA',
+
+  pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
+      icon: L.divIcon({
+        html: "🚒", // Fire truck emoji
+        className: 'fire-station-icon',
+        iconSize: L.point(30, 30)
+      })
+    });
+  },
+
+  onEachFeature: function(feature, layer) {
+    const props = feature.properties;
+
+    const popupContent = `
+      <strong>${props.NAME || 'Unknown Station'}</strong><hr>
+      <strong>Address:</strong> ${props.ADDRESS || 'N/A'}<br>
+      <strong>City:</strong> ${props.CITY || 'N/A'}<br>
+      <strong>County:</strong> ${props.COUNTY || 'N/A'}
+    `;
+
+    layer.bindPopup(popupContent);
+  }
+});
+
 // Listen for when layers are added or removed from the map's layer control
 map.on('overlayadd', function(e) {
     // If the layer being added is our EV charger layer...
