@@ -258,6 +258,12 @@ html, body {
   line-height: 1;
 }
 
+.university-icon {
+  font-size: 27px;  
+  text-align: center;
+  line-height: 1;
+}
+
 .healthCent-icon {
   font-size: 27px;  
   text-align: center;
