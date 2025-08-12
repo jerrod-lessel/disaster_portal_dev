@@ -425,6 +425,40 @@ function getChargersInView() {
         });
 }
 
+// --- Colleges & Universities Layer ---
+var universitiesLayer = L.esri.featureLayer({
+  url: 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Colleges_and_Universities/FeatureServer/0',
+  where: "STATE = 'CA'",
+  attribution: 'HIFLD Open Data',
+
+  pointToLayer: function (geojson, latlng) {
+    return L.marker(latlng, {
+      icon: L.divIcon({
+        html: "🎓", 
+        className: 'university-icon',
+        iconSize: L.point(30, 30)
+      })
+    });
+  },
+
+  onEachFeature: function(feature, layer) {
+    const props = feature.properties;
+    
+    // Format the student enrollment number
+    const enrollment = props.TOT_ENROLL ? props.TOT_ENROLL.toLocaleString() : 'N/A';
+
+    const popupContent = `
+      <strong>${props.NAME || 'Unknown Institution'}</strong><hr>
+      <strong>Type:</strong> ${props.TYPE || 'N/A'}<br>
+      <strong>Status:</strong> ${props.STATUS || 'N/A'}<br>
+      <strong>Total Enrollment:</strong> ${enrollment}<br>
+      <strong>City:</strong> ${props.CITY || 'N/A'}
+    `;
+
+    layer.bindPopup(popupContent);
+  }
+});
+
 // Setup the dynamic loading and initial call
 map.on('moveend', getChargersInView);
 getChargersInView();
