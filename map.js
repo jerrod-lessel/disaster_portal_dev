@@ -179,6 +179,7 @@ var calFireLayer = L.esri.featureLayer({
   },
 
   onEachFeature: function(feature, layer) {
+    console.log("Fire Properties:", feature.properties); 
     const props = feature.properties;
 
     // 1. Improved Acres Burned: Use CalculatedAcres, but fall back to DiscoveryAcres.
