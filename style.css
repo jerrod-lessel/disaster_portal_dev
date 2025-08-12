@@ -288,6 +288,12 @@ html, body {
   line-height: 1;
 }
 
+.fire-station-icon {
+  font-size: 27px;  
+  text-align: center;
+  line-height: 1;
+}
+
 .fire-icon {
   /* These properties help center the emoji perfectly inside its container */
   display: flex;
