@@ -165,29 +165,35 @@ var calFireLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0',
   where: "POOState = 'US-CA'",
   attribution: 'National Interagency Fire Center',
-  
  
  pointToLayer: function (geojson, latlng) {
-    const props = geojson.properties;
-    const acres = props.IncidentSize || 0;
-    let size = 30; // Default size for small fires
+  const props = geojson.properties;
+  const acres = props.IncidentSize || 0;
+  
+  // Define our size categories, including the CSS class name
+  let iconDetails = {
+    size: 30,
+    className: 'fire-icon fire-icon-sm' // Default for small fires
+  };
 
-    if (acres >= 10000) {
-      size = 100; // Major fires
-    } else if (acres >= 1000) {
-      size = 80; // Large fires
-    } else if (acres >= 100) {
-      size = 60; // Medium fires
-    }
+  if (acres >= 10000) {
+    iconDetails = { size: 60, className: 'fire-icon fire-icon-xl' }; // Major
+  } else if (acres >= 1000) {
+    iconDetails = { size: 50, className: 'fire-icon fire-icon-lg' }; // Large
+  } else if (acres >= 100) {
+    iconDetails = { size: 40, className: 'fire-icon fire-icon-md' }; // Medium
+  }
 
-    return L.marker(latlng, {
-      icon: L.divIcon({
-        html: "🔥",
-        className: 'fire-icon',
-        iconSize: L.point(size, size) // Use the dynamic size here
-      })
-    });
-  },
+  return L.marker(latlng, {
+    icon: L.divIcon({
+      html: "🔥",
+      className: iconDetails.className, // Use the dynamic class name
+      iconSize: L.point(iconDetails.size, iconDetails.size), // Use the dynamic container size
+      // THIS IS THE KEY: It keeps the icon centered on the point
+      iconAnchor: [iconDetails.size / 2, iconDetails.size / 2]
+    })
+  });
+},
 
   onEachFeature: function(feature, layer) {
     console.log("Fire Properties:", feature.properties); // Use for finding property names
