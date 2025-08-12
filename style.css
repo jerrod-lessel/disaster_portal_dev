@@ -291,10 +291,10 @@ html, body {
 }
 
 /* Define the different font sizes for our fire categories */
-.fire-icon-sm { font-size: 24px; }
-.fire-icon-md { font-size: 32px; }
+.fire-icon-sm { font-size: 15px; }
+.fire-icon-md { font-size: 25px; }
 .fire-icon-lg { font-size: 40px; }
-.fire-icon-xl { font-size: 48px; }
+.fire-icon-xl { font-size: 50px; }
 
 @media (max-width: 768px) {
   #container {
