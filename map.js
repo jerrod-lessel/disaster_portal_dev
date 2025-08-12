@@ -466,6 +466,7 @@ getChargersInView();
 // --- Fire Stations Layer (Using Your Verified CalOES Source) ---
 var fireStationsLayer = L.esri.featureLayer({
   url: 'https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Structures_Medical_Emergency_Response_v1/FeatureServer/2',
+  where: "STATE = 'CA'",
   attribution: 'Esri Federal Data/NGDA',
 
   pointToLayer: function (geojson, latlng) {
@@ -661,6 +662,7 @@ L.control.layers(
     "Hospitals": healthCentLayer,
     "Power Plants": powerPlants,
     "Airports": pubAirport,
+    "Fire Stations": fireStationsLayer,
     "Highway System": highwayLayer,
     "All Roads": allRoadsLayer,
     "State Bridges": stateBridgesLayer,
