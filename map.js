@@ -196,7 +196,7 @@ var calFireLayer = L.esri.featureLayer({
 },
 
   onEachFeature: function(feature, layer) {
-    console.log("Fire Properties:", feature.properties); // Use for finding property names
+    // console.log("Fire Properties:", feature.properties); // Use for finding property names
     const props = feature.properties;
     const cause = props.FireCause || 'Undetermined';
     const acres = (props.IncidentSize && props.IncidentSize > 0) ? Math.round(props.IncidentSize).toLocaleString() : 'N/A';
