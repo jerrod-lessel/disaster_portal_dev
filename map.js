@@ -162,12 +162,9 @@ var shakingLayer = L.esri.dynamicMapLayer({
 
 // --- Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC) ---
 var calFireLayer = L.esri.featureLayer({
-  // This is the URL for the reliable, public ArcGIS Living Atlas layer
   url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0',
-  // Filter for incidents only in California
   where: "POOState = 'US-CA'",
   attribution: 'National Interagency Fire Center',
-
   pointToLayer: function (geojson, latlng) {
     return L.marker(latlng, {
       icon: L.divIcon({
@@ -179,7 +176,7 @@ var calFireLayer = L.esri.featureLayer({
   },
 
   onEachFeature: function(feature, layer) {
-    // console.log("Fire Properties:", feature.properties); // Use for finding property names
+    console.log("Fire Properties:", feature.properties); // Use for finding property names
     const props = feature.properties;
 
     const acres = (props.IncidentSize && props.IncidentSize > 0) ? Math.round(props.IncidentSize).toLocaleString() : 'N/A';
