@@ -165,12 +165,26 @@ var calFireLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0',
   where: "POOState = 'US-CA'",
   attribution: 'National Interagency Fire Center',
-  pointToLayer: function (geojson, latlng) {
+  
+ 
+ pointToLayer: function (geojson, latlng) {
+    const props = geojson.properties;
+    const acres = props.IncidentSize || 0;
+    let size = 30; // Default size for small fires
+
+    if (acres >= 10000) {
+      size = 60; // Major fires
+    } else if (acres >= 1000) {
+      size = 50; // Large fires
+    } else if (acres >= 100) {
+      size = 40; // Medium fires
+    }
+
     return L.marker(latlng, {
       icon: L.divIcon({
         html: "🔥",
         className: 'fire-icon',
-        iconSize: L.point(30, 30)
+        iconSize: L.point(size, size) // Use the dynamic size here
       })
     });
   },
@@ -178,7 +192,7 @@ var calFireLayer = L.esri.featureLayer({
   onEachFeature: function(feature, layer) {
     console.log("Fire Properties:", feature.properties); // Use for finding property names
     const props = feature.properties;
-
+    const cause = props.FireCause || 'Undetermined';
     const acres = (props.IncidentSize && props.IncidentSize > 0) ? Math.round(props.IncidentSize).toLocaleString() : 'N/A';
     const contained = props.PercentContained ?? 0; // The name for Percent Contained
     const updated = new Date(props.ModifiedOnDateTime_dt).toLocaleString(); // The name for Last Updated
@@ -189,6 +203,7 @@ var calFireLayer = L.esri.featureLayer({
       <strong>${props.IncidentName || 'Unknown Fire'}</strong><hr>
       <strong>Acres Burned:</strong> ${acres}<br>
       <strong>Percent Contained:</strong> ${contained}%<br>
+      <strong>Cause:</strong> ${cause}<br> 
       <strong>Discovered:</strong> ${discovered}<br>
       <strong>Last Updated:</strong> ${updated}
     `;
