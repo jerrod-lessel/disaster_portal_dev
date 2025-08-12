@@ -282,6 +282,20 @@ html, body {
   line-height: 1;
 }
 
+.fire-icon {
+  /* These properties help center the emoji perfectly inside its container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+}
+
+/* Define the different font sizes for our fire categories */
+.fire-icon-sm { font-size: 24px; }
+.fire-icon-md { font-size: 32px; }
+.fire-icon-lg { font-size: 40px; }
+.fire-icon-xl { font-size: 48px; }
+
 @media (max-width: 768px) {
   #container {
     flex-direction: column;
