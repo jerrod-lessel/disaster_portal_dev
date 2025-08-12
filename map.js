@@ -173,11 +173,11 @@ var calFireLayer = L.esri.featureLayer({
     let size = 30; // Default size for small fires
 
     if (acres >= 10000) {
-      size = 60; // Major fires
+      size = 100; // Major fires
     } else if (acres >= 1000) {
-      size = 50; // Large fires
+      size = 80; // Large fires
     } else if (acres >= 100) {
-      size = 40; // Medium fires
+      size = 60; // Medium fires
     }
 
     return L.marker(latlng, {
