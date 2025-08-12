@@ -628,6 +628,7 @@ L.control.layers(
   {
     // Infrastructure
     "Schools": schoolsLayer,
+    "Universities": universitiesLayer,
     "Hospitals": healthCentLayer,
     "Power Plants": powerPlants,
     "Airports": pubAirport,
