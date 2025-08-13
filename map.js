@@ -459,6 +459,35 @@ var universitiesLayer = L.esri.featureLayer({
   }
 });
 
+// --- Parks and Green Space Layer (Using Your Verified CNRA Source) ---
+var parksLayer = L.esri.featureLayer({
+  // This is the excellent URL you found from the CA Natural Resources Agency
+  url: 'https://gis.cnra.ca.gov/arcgis/rest/services/Boundaries/CPAD_AccessType/MapServer/1',
+  // A simple green style for the park polygons
+  style: function () {
+    return { 
+      color: "#2E8B57", // "SeaGreen"
+      weight: 1, 
+      fillOpacity: 0.5 
+    };
+  },
+  attribution: 'CA Natural Resources Agency (CPAD)',
+
+  onEachFeature: function(feature, layer) {
+    const props = feature.properties;
+    
+    // Create popup content with the park's name and access type
+    const popupContent = `
+      <strong>${props.LABEL_NAME || 'Unnamed Park Area'}</strong><hr>
+      <strong>Access Type:</strong> ${props.ACCESS_TYP || 'N/A'}<br>
+      <strong>Acres:</strong> ${props.ACRES || 'N/A'}<br>
+      <strong>Manager:</strong> ${props.AGNCY_NAME || 'N/A'}
+    `;
+
+    layer.bindPopup(popupContent);
+  }
+});
+
 // Setup the dynamic loading and initial call
 map.on('moveend', getChargersInView);
 getChargersInView();
@@ -656,6 +685,15 @@ map.on("zoomend", function () {
   }
 });
 
+// Parks layer level zoom logic
+map.on("zoomend", function () {
+  if (map.getZoom() >= 14) {
+    if (!map.hasLayer(parksLayer)) map.addLayer(parksLayer);
+  } else {
+    if (map.hasLayer(parksLayer)) map.removeLayer(parksLayer);
+  }
+});
+
 // --- Controls ---
 // Layer Control
 L.control.layers(
@@ -676,6 +714,7 @@ L.control.layers(
     "State Bridges": stateBridgesLayer,
     "Local Bridges": localBridgesLayer,
     "EV Chargers": evChargersLayer,
+    "Parks": parksLayer,
 
     // Hazards
     "Fire Hazard Zones": fireHazardLayer,
