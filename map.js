@@ -104,10 +104,11 @@ function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
 function identifyLandslideAt(latlng, { tolerance = 3 } = {}) {
   return new Promise((resolve, reject) => {
     L.esri
-      .identifyMapService({ url: CGS_LANDSLIDE_URL })
+      .identifyFeatures({ url: CGS_LANDSLIDE_URL })
       .on(map)
       .at(latlng)
       .tolerance(tolerance)
+      .layers("all:0")
       .returnGeometry(false)
       .run((error, featureCollection, rawResponse) => {
         if (error) return reject(error);
