@@ -1,4 +1,4 @@
- // map.js - full version 
+// map.js - full version (updated with CGS Landslide Identify + Nearest logic)
 
 // Initialize the map
 var map = L.map('map').setView([37.5, -119.5], 6);
@@ -41,7 +41,120 @@ function hideSpinner() {
   document.getElementById("loading-spinner").classList.add("hidden");
 }
 
-// --- Layers ---
+/* ================================
+   LANDSLIDE IDENTIFY CONFIG & HELPERS
+   ================================ */
+
+// CGS MapServer (public, no subscription required)
+const CGS_LANDSLIDE_URL =
+  "https://gis.conservation.ca.gov/server/rest/services/CGS/MS58_LandslideSusceptibility_Classes/MapServer";
+
+// If the service returns a numeric value, map it here (adjust if needed once we see attrs)
+const LANDSLIDE_CLASS_MAP = {
+  10: { label: "X"  },
+  9:  { label: "IX" },
+  8:  { label: "VIII" },
+  7:  { label: "VII" },
+  6:  { label: "VI" },
+  5:  { label: "V"  },
+  4:  { label: "IV" },
+  3:  { label: "III" },
+  2:  { label: "II" },
+  1:  { label: "I"  }
+};
+
+// Prefer a text field for the class label; fall back to numeric → map → raw
+function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
+  // Uncomment for first-run debugging to see available fields:
+  // console.log("LS rawResponse:", rawResponse);
+  // console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
+
+  // 1) Pixel value present directly
+  if (rawResponse && typeof rawResponse.value !== "undefined") {
+    const v = Number(rawResponse.value);
+    return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+  }
+  if (rawResponse && typeof rawResponse.pixelValue !== "undefined") {
+    const v = Number(rawResponse.pixelValue);
+    return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+  }
+
+  // 2) Feature-like results
+  const f = featureCollection?.features?.[0];
+  const props = f?.properties || {};
+  // Try common text fields:
+  const textCandidates = ["ClassName", "Class", "LABEL", "Class_Label", "CLASS_LABEL", "Category", "CAT"];
+  for (const k of textCandidates) {
+    if (props[k]) return String(props[k]);
+  }
+  // Try common numeric fields:
+  const numCandidates = ["Value", "GRAY_INDEX", "PixelValue", "gridcode", "CLASS_VAL"];
+  for (const k of numCandidates) {
+    if (props[k] != null && props[k] !== "" && !Number.isNaN(Number(props[k]))) {
+      const v = Number(props[k]);
+      return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+    }
+  }
+
+  return null;
+}
+
+// Identify at a single point
+function identifyLandslideAt(latlng, { tolerance = 3 } = {}) {
+  return new Promise((resolve, reject) => {
+    L.esri
+      .identifyMapService({ url: CGS_LANDSLIDE_URL })
+      .on(map)
+      .at(latlng)
+      .tolerance(tolerance)
+      .returnGeometry(false)
+      .run((error, featureCollection, rawResponse) => {
+        if (error) return reject(error);
+        const label = parseLandslideLabelFromIdentify(rawResponse, featureCollection);
+        resolve(label); // may be null
+      });
+  });
+}
+
+// Light nearest search by sampling rings (kept modest to limit requests)
+async function findNearestLandslide(latlng, {
+  directions = 8,
+  stepKm = 2,
+  maxKm = 14
+} = {}) {
+  const R = 6371;
+  const toRad = d => d * Math.PI / 180;
+  const toDeg = r => r * 180 / Math.PI;
+
+  function offsetPoint(latlng, km, bearingDeg) {
+    const lat1 = toRad(latlng.lat);
+    const lon1 = toRad(latlng.lng);
+    const brg = toRad(bearingDeg);
+    const dR = km / R;
+
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(dR) + Math.cos(lat1) * Math.sin(dR) * Math.cos(brg));
+    const lon2 = lon1 + Math.atan2(
+      Math.sin(brg) * Math.sin(dR) * Math.cos(lat1),
+      Math.cos(dR) - Math.sin(lat1) * Math.sin(lat2)
+    );
+    return L.latLng(toDeg(lat2), ((toDeg(lon2) + 540) % 360) - 180);
+  }
+
+  for (let r = stepKm; r <= maxKm; r += stepKm) {
+    for (let i = 0; i < directions; i++) {
+      const bearing = (360 / directions) * i;
+      const p = offsetPoint(latlng, r, bearing);
+      // eslint-disable-next-line no-await-in-loop
+      const label = await identifyLandslideAt(p).catch(() => null);
+      if (label) return { label, distanceKm: r, at: p };
+    }
+  }
+  return null;
+}
+
+/* ================================
+   LAYERS
+   ================================ */
 
 // Dynamic Landslide Layer (visual only)
 var landslideLayer = L.esri.dynamicMapLayer({
@@ -196,15 +309,13 @@ var calFireLayer = L.esri.featureLayer({
 },
 
   onEachFeature: function(feature, layer) {
-    // console.log("Fire Properties:", feature.properties); // Use for finding property names
     const props = feature.properties;
     const cause = props.FireCause || 'Undetermined';
     const acres = (props.IncidentSize && props.IncidentSize > 0) ? Math.round(props.IncidentSize).toLocaleString() : 'N/A';
-    const contained = props.PercentContained ?? 0; // The name for Percent Contained
-    const updated = new Date(props.ModifiedOnDateTime_dt).toLocaleString(); // The name for Last Updated
-    const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString(); // This one was already working
+    const contained = props.PercentContained ?? 0;
+    const updated = new Date(props.ModifiedOnDateTime_dt).toLocaleString();
+    const discovered = new Date(props.FireDiscoveryDateTime).toLocaleDateString();
   
-    // Build the new, more detailed popup content
     const popupContent = `
       <strong>${props.IncidentName || 'Unknown Fire'}</strong><hr>
       <strong>Acres Burned:</strong> ${acres}<br>
@@ -376,9 +487,7 @@ function getChargersInView() {
 
                     let totalPorts = 0;
                     if (charger.Connections && charger.Connections.length > 0) {
-                        // Loop through each connection type at the location
                         charger.Connections.forEach(connection => {
-                            // Add the quantity of each connection type to the total. Default to 1 if quantity isn't specified.
                             totalPorts += connection.Quantity || 1; 
                         });
                     }
@@ -401,7 +510,6 @@ function getChargersInView() {
                         icon: L.divIcon({ html: "🔋", className: "evcharger-icon", iconSize: L.point(30, 30) })
                     });
 
-                    // Build the popup using the new 'totalPorts' variable
                     const popupContent = `
                         <strong>${charger.AddressInfo.Title}</strong><br>
                         <hr>
@@ -443,8 +551,6 @@ var universitiesLayer = L.esri.featureLayer({
 
   onEachFeature: function(feature, layer) {
     const props = feature.properties;
-    
-    // Format the student enrollment number
     const enrollment = props.TOT_ENROLL ? props.TOT_ENROLL.toLocaleString() : 'N/A';
 
     const popupContent = `
@@ -459,14 +565,12 @@ var universitiesLayer = L.esri.featureLayer({
   }
 });
 
-// --- Parks and Green Space Layer (Using Your Verified CNRA Source) ---
+// --- Parks and Green Space Layer ---
 var parksLayer = L.esri.featureLayer({
-  // This is the excellent URL you found from the CA Natural Resources Agency
   url: 'https://gis.cnra.ca.gov/arcgis/rest/services/Boundaries/CPAD_AccessType/MapServer/1',
-  // A simple green style for the park polygons
   style: function () {
     return { 
-      color: "#2E8B57", // "SeaGreen"
+      color: "#2E8B57",
       weight: 1, 
       fillOpacity: 0.5 
     };
@@ -475,15 +579,12 @@ var parksLayer = L.esri.featureLayer({
 
   onEachFeature: function(feature, layer) {
     const props = feature.properties;
-    
-    // Create popup content with the park's name and access type
     const popupContent = `
       <strong>${props.LABEL_NAME || 'Unnamed Park Area'}</strong><hr>
       <strong>Access Type:</strong> ${props.ACCESS_TYP || 'N/A'}<br>
       <strong>Acres:</strong> ${props.ACRES || 'N/A'}<br>
       <strong>Manager:</strong> ${props.AGNCY_NAME || 'N/A'}
     `;
-
     layer.bindPopup(popupContent);
   }
 });
@@ -492,7 +593,7 @@ var parksLayer = L.esri.featureLayer({
 map.on('moveend', getChargersInView);
 getChargersInView();
 
-// --- Fire Stations Layer (Using Your Verified CalOES Source) ---
+// --- Fire Stations Layer ---
 var fireStationsLayer = L.esri.featureLayer({
   url: 'https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Structures_Medical_Emergency_Response_v1/FeatureServer/2',
   where: "STATE = 'CA'",
@@ -501,7 +602,7 @@ var fireStationsLayer = L.esri.featureLayer({
   pointToLayer: function (geojson, latlng) {
     return L.marker(latlng, {
       icon: L.divIcon({
-        html: "🚒", // Fire truck emoji
+        html: "🚒",
         className: 'fire-station-icon',
         iconSize: L.point(30, 30)
       })
@@ -523,17 +624,13 @@ var fireStationsLayer = L.esri.featureLayer({
 
 // Listen for when layers are added or removed from the map's layer control
 map.on('overlayadd', function(e) {
-    // If the layer being added is our EV charger layer...
     if (e.layer === evChargersLayer) {
-        // ...add our custom attribution text to the map's attribution control.
         this.attributionControl.addAttribution(OCM_ATTRIBUTION);
     }
 });
 
 map.on('overlayremove', function(e) {
-    // If the layer being removed is our EV charger layer...
     if (e.layer === evChargersLayer) {
-        // ...remove our custom attribution text.
         this.attributionControl.removeAttribution(OCM_ATTRIBUTION);
     }
 });
@@ -545,7 +642,7 @@ var stateBridgesLayer = L.esri.featureLayer({
   pointToLayer: function(geojson, latlng) {
     return L.circleMarker(latlng, {
       radius: 5,
-      fillColor: "#636363",  // Charcoal gray for state bridges
+      fillColor: "#636363",
       color: "#252525",
       weight: 1,
       opacity: 1,
@@ -572,7 +669,7 @@ var localBridgesLayer = L.esri.featureLayer({
   pointToLayer: function(geojson, latlng) {
     return L.circleMarker(latlng, {
       radius: 5,
-      fillColor: "#bdbdbd",  // Light grey for local bridges
+      fillColor: "#bdbdbd",
       color: "#636363",
       weight: 1,
       opacity: 1,
@@ -870,7 +967,7 @@ document.addEventListener('DOMContentLoaded', function () {
     legendPanel.addEventListener('mouseenter', function () { map.scrollWheelZoom.disable(); });
     legendPanel.addEventListener('mouseleave', function () { map.scrollWheelZoom.enable(); });
   }
-  document.getElementById('legend-toggle').addEventListener('click', function (e) {
+  document.getElementById('legend-toggle')?.addEventListener('click', function (e) {
     e.preventDefault();
     document.querySelector('.legend-panel').classList.toggle('hidden');
   });
@@ -914,7 +1011,9 @@ function getClosestFeatureByEdgeDistance(layer, clickLatLng, label, fieldName, r
   });
 }
 
-// --- Click Event Logic ---
+/* ================================
+   CLICK EVENT: HAZARD QUERIES
+   ================================ */
 map.on("click", function (e) {
   showSpinner();
   if (clickMarker) map.removeLayer(clickMarker);
@@ -929,110 +1028,144 @@ map.on("click", function (e) {
 
   function checkDone() {
     completed++;
-    if (completed === 5) {
-      results.push("■ <strong>Landslide Susceptibility:</strong> Visual only");
+    if (completed === 6) { // now: fire, flood, ozone, pm, drinkP, landslide
       results.push("■ <strong>Shaking Potential:</strong> Visual only");
       document.getElementById("report-content").innerHTML = results.join("<br><br>");
       hideSpinner();
     }
   }
 
+  // Fire
   fireHazardLayer.query().contains(e.latlng).run(function (err, fc) {
-  if (!err && fc.features.length > 0) {
-    const zone = fc.features[0].properties.FHSZ_Description;
-    results.push(`■ <strong>Fire Hazard Zone:</strong><br>
+    if (!err && fc.features.length > 0) {
+      const zone = fc.features[0].properties.FHSZ_Description;
+      results.push(`■ <strong>Fire Hazard Zone:</strong><br>
 This area falls within a <strong>${zone}</strong> fire hazard zone as defined by the California Department of Forestry and Fire Protection (CAL FIRE).<br>
 Fire hazard zones reflect the severity of potential fire exposure based on fuels, terrain, weather, and other factors.`);
-    checkDone();
-  } else {
-    getClosestFeatureByEdgeDistance(fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description", results, function () {
-      results.push(`■ <em>Note:</em> Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.`);
       checkDone();
-    });
-  }
-});
+    } else {
+      getClosestFeatureByEdgeDistance(fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description", results, function () {
+        results.push(`■ <em>Note:</em> Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.`);
+        checkDone();
+      });
+    }
+  });
 
+  // Flood
   floodLayer.query().contains(e.latlng).run(function (err, fc) {
-  if (!err && fc.features.length > 0) {
-    const zone = fc.features[0].properties.ESRI_SYMBOLOGY;
-    results.push(`■ <strong>Flood Hazard Zone:</strong><br>
+    if (!err && fc.features.length > 0) {
+      const zone = fc.features[0].properties.ESRI_SYMBOLOGY;
+      results.push(`■ <strong>Flood Hazard Zone:</strong><br>
 This location falls within a <strong>${zone}</strong> as designated by FEMA's National Flood Hazard Layer.<br>
 Flood zones represent areas at varying levels of flood risk during extreme weather events and are used to inform insurance, development, and evacuation planning.`);
-    checkDone();
-  } else {
-    getClosestFeatureByEdgeDistance(floodLayer, e.latlng, "Flood Hazard Zone", "ESRI_SYMBOLOGY", results, function () {
-      results.push(`■ <em>Note:</em> FEMA flood zones help identify areas at high risk for flooding and guide floodplain management decisions across California.`);
       checkDone();
-    });
-  }
-});
+    } else {
+      getClosestFeatureByEdgeDistance(floodLayer, e.latlng, "Flood Hazard Zone", "ESRI_SYMBOLOGY", results, function () {
+        results.push(`■ <em>Note:</em> FEMA flood zones help identify areas at high risk for flooding and guide floodplain management decisions across California.`);
+        checkDone();
+      });
+    }
+  });
 
-
+  // Ozone
   ozoneLayer.query().contains(e.latlng).run(function (err, fc) {
-  if (!err && fc.features.length > 0) {
-    const props = fc.features[0].properties;
-    const ppm = props.ozone?.toFixed(3) ?? "unknown";
-    const pct = props.ozoneP !== undefined ? Math.round(props.ozoneP) : "unknown";
-    results.push(`■ <strong>Ozone (Ground-Level):</strong><br>
+    if (!err && fc.features.length > 0) {
+      const props = fc.features[0].properties;
+      const ppm = props.ozone?.toFixed(3) ?? "unknown";
+      const pct = props.ozoneP !== undefined ? Math.round(props.ozoneP) : "unknown";
+      results.push(`■ <strong>Ozone (Ground-Level):</strong><br>
 The indicator is the mean of summer months (May – October) of the daily maximum 8-hour ozone concentration (ppm). This measurement is used to represent short-term ozone health impacts. This census tract has a summed concentration of <strong>${ppm} ppm</strong>.
 The ozone percentile for this census tract is <strong>${pct}</strong>, meaning the summed concentration is higher than ${pct}% of the census tracts in California.<br>
 (Data from 2017 to 2019)`);
+      checkDone();
+    } else {
+      getClosestFeatureByEdgeDistance(
+        ozoneLayer,
+        e.latlng,
+        "Ozone Level",
+        "ozoneP",
+        results,
+        checkDone
+      );
+    }
+  });
 
-    checkDone();
-  } else {
-    getClosestFeatureByEdgeDistance(
-      ozoneLayer,
-      e.latlng,
-      "Ozone Level",
-      "ozoneP",
-      results,
-      checkDone
-    );
-  }
-});
-
-pmLayer.query().contains(e.latlng).run(function (err, fc) {
-  if (!err && fc.features.length > 0) {
-    const props = fc.features[0].properties;
-    const value = props.pm?.toFixed(2) ?? "unknown";
-    const pct = props.pmP !== undefined ? Math.round(props.pmP) : "unknown";
-    results.push(`■ <strong>PM2.5 (Fine Particulate Matter) Concentration:</strong><br>
+  // PM2.5
+  pmLayer.query().contains(e.latlng).run(function (err, fc) {
+    if (!err && fc.features.length > 0) {
+      const props = fc.features[0].properties;
+      const value = props.pm?.toFixed(2) ?? "unknown";
+      const pct = props.pmP !== undefined ? Math.round(props.pmP) : "unknown";
+      results.push(`■ <strong>PM2.5 (Fine Particulate Matter) Concentration:</strong><br>
 This census tract has a concentration of <strong>${value} µg/m³</strong>. The PM2.5 percentile for this census tract is <strong>${pct}</strong>, meaning it is higher than ${pct}% of the census tracts in California.<br>
 (Data from 2015 to 2017)`);
-    checkDone();
-  } else {
-    getClosestFeatureByEdgeDistance(
-      pmLayer,
-      e.latlng,
-      "PM2.5 Concentration",
-      "pmP",
-      results,
-      checkDone
-    );
-  }
-});
+      checkDone();
+    } else {
+      getClosestFeatureByEdgeDistance(
+        pmLayer,
+        e.latlng,
+        "PM2.5 Concentration",
+        "pmP",
+        results,
+        checkDone
+      );
+    }
+  });
 
-drinkP_Layer.query().contains(e.latlng).run(function (err, fc) {
-  if (!err && fc.features.length > 0) {
-    const props = fc.features[0].properties;
-    const value = props.drink?.toFixed(2) ?? "unknown";
-    const pct = props.drinkP !== undefined ? Math.round(props.drinkP) : "unknown";
-    results.push(`■ <strong>Drinking Water Contaminants:</strong><br>
+  // Drinking water contaminants
+  drinkP_Layer.query().contains(e.latlng).run(function (err, fc) {
+    if (!err && fc.features.length > 0) {
+      const props = fc.features[0].properties;
+      const value = props.drink?.toFixed(2) ?? "unknown";
+      const pct = props.drinkP !== undefined ? Math.round(props.drinkP) : "unknown";
+      results.push(`■ <strong>Drinking Water Contaminants:</strong><br>
 The drinking water contaminant score for this census tract is <strong>${value}</strong>, which is the sum of the contaminant and violation percentiles.
 The drinking water contaminant percentile is <strong>${pct}</strong>, meaning it is higher than ${pct}% of census tracts in California.<br>
 (Data from 2011–2019, the most recent complete compliance cycle.)`);
+      checkDone();
+    } else {
+      getClosestFeatureByEdgeDistance(
+        drinkP_Layer,
+        e.latlng,
+        "Drinking Water Contaminant Score",
+        "drinkP",
+        results,
+        checkDone
+      );
+    }
+  });
 
-    checkDone();
-  } else {
-    getClosestFeatureByEdgeDistance(
-      drinkP_Layer,
-      e.latlng,
-      "Drinking Water Contaminant Score",
-      "drinkP",
-      results,
-      checkDone
-    );
-  }
-});
-  
-}); 
+  // === Landslide Susceptibility (Identify against CGS MapServer) ===
+  (async () => {
+    try {
+      const label = await identifyLandslideAt(e.latlng);
+      if (label) {
+        results.push(`■ <strong>Landslide Susceptibility:</strong><br>
+This location falls within class <strong>${label}</strong> in the California Geological Survey’s Landslide Susceptibility map.`);
+        checkDone();
+        return;
+      }
+      // Not inside a class—try nearest
+      const nearest = await findNearestLandslide(e.latlng, { directions: 8, stepKm: 2, maxKm: 14 });
+      if (nearest) {
+        results.push(`■ <strong>Landslide Susceptibility (Nearest):</strong><br>
+Nearest class: <strong>${nearest.label}</strong><br>
+📏 Distance: ${nearest.distanceKm.toFixed(1)} km`);
+      } else {
+        results.push(`■ <strong>Landslide Susceptibility:</strong> No mapped value nearby.`);
+      }
+    } catch (err) {
+      console.warn("Landslide identify error:", err);
+      results.push(`■ <strong>Landslide Susceptibility:</strong> Error fetching value.`);
+    } finally {
+      checkDone();
+    }
+  })();
+
+}); // end click
+
+/* ================================
+   EV CHARGERS: INIT MOVEND
+   ================================ */
+map.on('moveend', getChargersInView);
+getChargersInView();
