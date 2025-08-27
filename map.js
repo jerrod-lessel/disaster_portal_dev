@@ -60,7 +60,8 @@ const LANDSLIDE_CLASS_MAP = {
   4:  { label: "IV" },
   3:  { label: "III" },
   2:  { label: "II" },
-  1:  { label: "I"  }
+  1:  { label: "I"  },
+  0:  { label: "0"  }
 };
 
 // Prefer a text field for the class label; fall back to numeric → map → raw
