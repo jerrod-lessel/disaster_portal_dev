@@ -64,38 +64,54 @@ const LANDSLIDE_CLASS_MAP = {
   0:  { label: "0"  }
 };
 
-// Prefer raster-style "results[0].attributes" / ".value"; fall back to FC props if present
+// Replace your existing parser with this
 function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
-  // ---- DEBUG: uncomment while testing ----
-   console.log("LS rawResponse:", rawResponse);
-   console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
+  // ---- leave these on for one or two clicks if you want ----
+  // console.log("LS rawResponse:", rawResponse);
+  // console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
 
-  // A) Classic raster identify: results[0].value or results[0].attributes.*
+  // A) Raster-style response: results[0].attributes / .value
   if (rawResponse && Array.isArray(rawResponse.results) && rawResponse.results.length > 0) {
     const r0 = rawResponse.results[0];
 
+    // direct numeric 'value' sometimes present
     if (typeof r0.value !== "undefined" && r0.value !== null) {
       const v = Number(r0.value);
-      return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+      if (!Number.isNaN(v)) return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
     }
 
     const attrs = r0.attributes || {};
-    // Numeric keys we often see on rasters
-    const rasterNumKeys = ["Pixel Value", "PixelValue", "Value", "GRAY_INDEX", "gridcode"];
-    for (const k of rasterNumKeys) {
+
+    // exact keys we saw in your console
+    const exactKeys = [
+      "UniqueValue.Pixel Value",
+      "Raster.Value"
+    ];
+    for (const k of exactKeys) {
       if (k in attrs && attrs[k] !== null && attrs[k] !== "") {
         const v = Number(attrs[k]);
         if (!Number.isNaN(v)) return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
       }
     }
-    // Possible text label keys
-    const rasterTextKeys = ["ClassName", "Class", "LABEL", "Class_Label", "CLASS_LABEL", "Category"];
-    for (const k of rasterTextKeys) {
+
+    // generic fallbacks: look for any attribute name that ends with Pixel/Value-ish
+    const numericLike = Object.keys(attrs).find(k =>
+      /(Pixel ?Value|^Value$|GRAY_INDEX|gridcode)$/i.test(k)
+      && attrs[k] !== null && attrs[k] !== "" && !Number.isNaN(Number(attrs[k]))
+    );
+    if (numericLike) {
+      const v = Number(attrs[numericLike]);
+      if (!Number.isNaN(v)) return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+    }
+
+    // possible text label keys (if they ever exist)
+    const textKeys = ["ClassName", "Class", "LABEL", "Class_Label", "CLASS_LABEL", "Category"];
+    for (const k of textKeys) {
       if (attrs[k]) return String(attrs[k]);
     }
   }
 
-  // B) Fallback: GeoJSON-style properties (unlikely for this raster, but safe)
+  // B) Fallback (unlikely for this raster)
   const f = featureCollection?.features?.[0];
   const props = f?.properties || {};
   const textCandidates = ["ClassName", "Class", "LABEL", "Class_Label", "CLASS_LABEL", "Category", "CAT"];
@@ -114,22 +130,21 @@ function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
 }
 
 function identifyLandslideAt(latlng, { tolerance = 8 } = {}) {
-  function runIdentify(layersMode) {
-    return new Promise((resolve, reject) => {
-      L.esri
-        .identifyFeatures({ url: CGS_LANDSLIDE_URL })
-        .on(map)                     // lets Esri-leaflet use map size/extent in the request
-        .at(latlng)
-        .tolerance(tolerance)
-        .layers(layersMode)          // try "all:0" then "visible:0"
-        .returnGeometry(false)
-        .run((error, featureCollection, rawResponse) => {
-          if (error) return reject(error);
-          const label = parseLandslideLabelFromIdentify(rawResponse, featureCollection);
-          resolve(label);
-        });
-    });
-  }
+  return new Promise((resolve, reject) => {
+    L.esri
+      .identifyFeatures({ url: CGS_LANDSLIDE_URL })
+      .on(map)
+      .at(latlng)
+      .tolerance(tolerance)
+      .layers("visible:0")      // single pass is enough here
+      .returnGeometry(false)
+      .run((error, featureCollection, rawResponse) => {
+        if (error) return reject(error);
+        const label = parseLandslideLabelFromIdentify(rawResponse, featureCollection);
+        resolve(label);
+      });
+  });
+}
 
   // Many raster services respond to one of these two:
   return runIdentify("all:0").then(label => {
