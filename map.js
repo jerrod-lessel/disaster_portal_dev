@@ -67,8 +67,8 @@ const LANDSLIDE_CLASS_MAP = {
 // Replace your existing parser with this
 function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
   // ---- leave these on for one or two clicks if you want ----
-  // console.log("LS rawResponse:", rawResponse);
-  // console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
+   console.log("LS rawResponse:", rawResponse);
+   console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
 
   // A) Raster-style response: results[0].attributes / .value
   if (rawResponse && Array.isArray(rawResponse.results) && rawResponse.results.length > 0) {
