@@ -64,31 +64,44 @@ const LANDSLIDE_CLASS_MAP = {
   0:  { label: "0"  }
 };
 
-// Prefer a text field for the class label; fall back to numeric → map → raw
+// Prefer raster-style "results[0].attributes" / ".value"; fall back to FC props if present
 function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
-  // Uncomment for first-run debugging to see available fields:
+  // ---- DEBUG: uncomment while testing ----
   // console.log("LS rawResponse:", rawResponse);
   // console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
 
-  // 1) Pixel value present directly
-  if (rawResponse && typeof rawResponse.value !== "undefined") {
-    const v = Number(rawResponse.value);
-    return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
-  }
-  if (rawResponse && typeof rawResponse.pixelValue !== "undefined") {
-    const v = Number(rawResponse.pixelValue);
-    return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+  // A) Classic raster identify: results[0].value or results[0].attributes.*
+  if (rawResponse && Array.isArray(rawResponse.results) && rawResponse.results.length > 0) {
+    const r0 = rawResponse.results[0];
+
+    if (typeof r0.value !== "undefined" && r0.value !== null) {
+      const v = Number(r0.value);
+      return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+    }
+
+    const attrs = r0.attributes || {};
+    // Numeric keys we often see on rasters
+    const rasterNumKeys = ["Pixel Value", "PixelValue", "Value", "GRAY_INDEX", "gridcode"];
+    for (const k of rasterNumKeys) {
+      if (k in attrs && attrs[k] !== null && attrs[k] !== "") {
+        const v = Number(attrs[k]);
+        if (!Number.isNaN(v)) return LANDSLIDE_CLASS_MAP[v]?.label ?? String(v);
+      }
+    }
+    // Possible text label keys
+    const rasterTextKeys = ["ClassName", "Class", "LABEL", "Class_Label", "CLASS_LABEL", "Category"];
+    for (const k of rasterTextKeys) {
+      if (attrs[k]) return String(attrs[k]);
+    }
   }
 
-  // 2) Feature-like results
+  // B) Fallback: GeoJSON-style properties (unlikely for this raster, but safe)
   const f = featureCollection?.features?.[0];
   const props = f?.properties || {};
-  // Try common text fields:
   const textCandidates = ["ClassName", "Class", "LABEL", "Class_Label", "CLASS_LABEL", "Category", "CAT"];
   for (const k of textCandidates) {
     if (props[k]) return String(props[k]);
   }
-  // Try common numeric fields:
   const numCandidates = ["Value", "GRAY_INDEX", "PixelValue", "gridcode", "CLASS_VAL"];
   for (const k of numCandidates) {
     if (props[k] != null && props[k] !== "" && !Number.isNaN(Number(props[k]))) {
@@ -100,21 +113,28 @@ function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
   return null;
 }
 
-// Identify at a single point
-function identifyLandslideAt(latlng, { tolerance = 3 } = {}) {
-  return new Promise((resolve, reject) => {
-    L.esri
-      .identifyFeatures({ url: CGS_LANDSLIDE_URL })
-      .on(map)
-      .at(latlng)
-      .tolerance(tolerance)
-      .layers("all:0")
-      .returnGeometry(false)
-      .run((error, featureCollection, rawResponse) => {
-        if (error) return reject(error);
-        const label = parseLandslideLabelFromIdentify(rawResponse, featureCollection);
-        resolve(label); // may be null
-      });
+function identifyLandslideAt(latlng, { tolerance = 8 } = {}) {
+  function runIdentify(layersMode) {
+    return new Promise((resolve, reject) => {
+      L.esri
+        .identifyFeatures({ url: CGS_LANDSLIDE_URL })
+        .on(map)                     // lets Esri-leaflet use map size/extent in the request
+        .at(latlng)
+        .tolerance(tolerance)
+        .layers(layersMode)          // try "all:0" then "visible:0"
+        .returnGeometry(false)
+        .run((error, featureCollection, rawResponse) => {
+          if (error) return reject(error);
+          const label = parseLandslideLabelFromIdentify(rawResponse, featureCollection);
+          resolve(label);
+        });
+    });
+  }
+
+  // Many raster services respond to one of these two:
+  return runIdentify("all:0").then(label => {
+    if (label) return label;
+    return runIdentify("visible:0");
   });
 }
 
