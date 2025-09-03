@@ -146,13 +146,6 @@ function identifyLandslideAt(latlng, { tolerance = 8 } = {}) {
   });
 }
 
-  // Many raster services respond to one of these two:
-  return runIdentify("all:0").then(label => {
-    if (label) return label;
-    return runIdentify("visible:0");
-  });
-}
-
 // Light nearest search by sampling rings (kept modest to limit requests)
 async function findNearestLandslide(latlng, {
   directions = 8,
