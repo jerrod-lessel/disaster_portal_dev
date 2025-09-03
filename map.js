@@ -67,8 +67,8 @@ const LANDSLIDE_CLASS_MAP = {
 // Prefer raster-style "results[0].attributes" / ".value"; fall back to FC props if present
 function parseLandslideLabelFromIdentify(rawResponse, featureCollection) {
   // ---- DEBUG: uncomment while testing ----
-  // console.log("LS rawResponse:", rawResponse);
-  // console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
+   console.log("LS rawResponse:", rawResponse);
+   console.log("LS feature props:", featureCollection?.features?.[0]?.properties);
 
   // A) Classic raster identify: results[0].value or results[0].attributes.*
   if (rawResponse && Array.isArray(rawResponse.results) && rawResponse.results.length > 0) {
