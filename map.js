@@ -563,35 +563,69 @@ function getChargersInView() {
         });
 }
 
-// Colleges & Universities Layer 
-var universitiesLayer = L.esri.featureLayer({
-  url: 'https://services2.arcgis.com/FiaPA4ga0iQKduv3/ArcGIS/rest/services/Colleges_and_Universities_View/FeatureServer/0',
-  where: "STABBR = 'CA'",
-  attribution: 'National Center for Education Statistics (NCES)',
+// Colleges & Universities Layer (NCES, California only, with coded-value decoding)
+const collegesUrl = 'https://services2.arcgis.com/FiaPA4ga0iQKduv3/ArcGIS/rest/services/Colleges_and_Universities_View/FeatureServer/0';
 
+// cache of { fieldName: { code -> name } }
+const collegeDomains = {};
+
+// helper: build domain maps from service metadata
+function buildDomainMaps(md) {
+  if (!md || !Array.isArray(md.fields)) return;
+  md.fields.forEach(f => {
+    if (f.domain && f.domain.type === 'codedValue') {
+      const dict = {};
+      f.domain.codedValues.forEach(cv => {
+        dict[String(cv.code)] = cv.name;
+      });
+      collegeDomains[f.name] = dict;
+    }
+  });
+}
+
+// helper: decode value using domain if available
+function decodeDomain(fieldName, value) {
+  if (value == null) return "N/A";
+  const dict = collegeDomains[fieldName];
+  if (!dict) return value;
+  const key = String(value);
+  return dict[key] ?? value;
+}
+
+var universitiesLayer = L.esri.featureLayer({
+  url: collegesUrl,
+  where: "STABBR = 'CA'",   // California only
+  attribution: 'National Center for Education Statistics (NCES)',
   pointToLayer: function (geojson, latlng) {
     return L.marker(latlng, {
       icon: L.divIcon({
-        html: "🎓", 
+        html: "🎓",
         className: 'university-icon',
         iconSize: L.point(30, 30)
       })
     });
   },
-
-  onEachFeature: function(feature, layer) {
-    const props = feature.properties;
+  onEachFeature: function (feature, layer) {
+    const p = feature.properties;
 
     const popupContent = `
-      <strong>${props.INSTNM || 'Unknown Institution'}</strong><hr>
-      <strong>Highest level offering:</strong> ${props.HLOFFER || 'N/A'}<br>
-      <strong>Institutional category:</strong> ${props.INSTCAT || 'N/A'}<br>
-      <strong>Institution size category:</strong> ${props.INSTSIZE}<br>
-      <strong>Institution has hospital:</strong> ${props.HOSPITAL || 'N/A'}<br>
-      <strong>City:</strong> ${props.CITY || 'N/A'}
+      <strong>${p.INSTNM || 'Unknown Institution'}</strong><hr>
+      <strong>Highest level offering:</strong> ${decodeDomain('HLOFFER', p.HLOFFER)}<br>
+      <strong>Institutional category:</strong> ${decodeDomain('INSTCAT', p.INSTCAT)}<br>
+      <strong>Institution size category:</strong> ${decodeDomain('INSTSIZE', p.INSTSIZE)}<br>
+      <strong>Institution has hospital:</strong> ${decodeDomain('HOSPITAL', p.HOSPITAL)}<br>
+      <strong>City:</strong> ${p.CITY || 'N/A'}
     `;
-
     layer.bindPopup(popupContent);
+  }
+});
+
+// Build domain maps once so decodeDomain() works
+universitiesLayer.metadata(function (err, md) {
+  if (err) {
+    console.warn('Colleges metadata error:', err);
+  } else {
+    buildDomainMaps(md);
   }
 });
 
