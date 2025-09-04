@@ -303,7 +303,7 @@ var shakingLayer = L.esri.dynamicMapLayer({
   opacity: 0.6
 })//.addTo(map);
 
-// --- Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC) ---
+// Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC)
 var calFireLayer = L.esri.featureLayer({
   url: 'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0',
   where: "POOState = 'US-CA'",
@@ -563,11 +563,11 @@ function getChargersInView() {
         });
 }
 
-// --- Colleges & Universities Layer ---
+// Colleges & Universities Layer 
 var universitiesLayer = L.esri.featureLayer({
-  url: 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Colleges_and_Universities/FeatureServer/0',
-  where: "STATE = 'CA'",
-  attribution: 'HIFLD Open Data',
+  url: 'https://services2.arcgis.com/FiaPA4ga0iQKduv3/ArcGIS/rest/services/Colleges_and_Universities_View/FeatureServer/0',
+  where: "STABBR = 'CA'",
+  attribution: 'National Center for Education Statistics (NCES)',
 
   pointToLayer: function (geojson, latlng) {
     return L.marker(latlng, {
@@ -581,13 +581,13 @@ var universitiesLayer = L.esri.featureLayer({
 
   onEachFeature: function(feature, layer) {
     const props = feature.properties;
-    const enrollment = props.TOT_ENROLL ? props.TOT_ENROLL.toLocaleString() : 'N/A';
 
     const popupContent = `
-      <strong>${props.NAME || 'Unknown Institution'}</strong><hr>
-      <strong>Type:</strong> ${props.TYPE || 'N/A'}<br>
-      <strong>Status:</strong> ${props.STATUS || 'N/A'}<br>
-      <strong>Total Enrollment:</strong> ${enrollment}<br>
+      <strong>${props.INSTNM || 'Unknown Institution'}</strong><hr>
+      <strong>Highest level offering:</strong> ${props.HLOFFER || 'N/A'}<br>
+      <strong>Institutional category:</strong> ${props.INSTCAT || 'N/A'}<br>
+      <strong>Institution size category:</strong> ${props.INSTSIZE}<br>
+      <strong>Institution has hospital:</strong> ${props.HOSPITAL || 'N/A'}<br>
       <strong>City:</strong> ${props.CITY || 'N/A'}
     `;
 
