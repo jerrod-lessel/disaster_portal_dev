@@ -297,11 +297,89 @@ var drinkP_Layer = L.esri.featureLayer({
   }
 })//.addTo(map);
 
-// Earthquake Shaking Potential Layer (visual only)
-var shakingLayer = L.esri.dynamicMapLayer({
-  url: 'https://gis.conservation.ca.gov/server/rest/services/CGS/MS48_ShakingPotential/MapServer',
+/* ================================
+   SHAKING (MS48: MMI from PGV, 10% in 50 years)
+   ================================ */
+
+// ImageServer endpoint for the MS48 “MMI from PGV (10% in 50 yrs)”
+const SHAKING_MMI_URL =
+  'https://gis.conservation.ca.gov/arcgis/rest/services/MS48/MMI_from_PGV_10pct50yrs/ImageServer';
+  Attribution: California Geological Survey
+
+// Visual layer
+const shakingMMI_10in50 = L.esri.imageMapLayer({
+  url: SHAKING_MMI_URL,
   opacity: 0.6
-})//.addTo(map);
+}); // add it to your layer control like other overlays
+
+// MMI class lookup (rounded down to integer 1–10)
+const MMI_CLASSES = {
+  1: { roman: 'I',    desc: 'Not felt' },
+  2: { roman: 'II',   desc: 'Weak' },
+  3: { roman: 'III',  desc: 'Weak' },
+  4: { roman: 'IV',   desc: 'Light' },
+  5: { roman: 'V',    desc: 'Moderate' },
+  6: { roman: 'VI',   desc: 'Strong' },
+  7: { roman: 'VII',  desc: 'Very Strong' },
+  8: { roman: 'VIII', desc: 'Severe' },
+  9: { roman: 'IX',   desc: 'Violent' },
+  10:{ roman: 'X+',   desc: 'Extreme' }
+};
+
+// Parse MMI value out of an ImageServer identify response
+function parseMMIFromIdentify(rawResponse, resultObj) {
+  // Common places Esri ImageServer puts the pixel value
+  let v = null;
+  if (rawResponse && typeof rawResponse.value !== 'undefined') v = Number(rawResponse.value);
+  if (v == null && rawResponse && typeof rawResponse.pixelValue !== 'undefined') v = Number(rawResponse.pixelValue);
+  if (v == null && resultObj && typeof resultObj.value !== 'undefined') v = Number(resultObj.value);
+  return Number.isFinite(v) ? v : null;
+}
+
+// Convert numeric MMI to class label
+function formatMMI(mmi) {
+  const intClass = Math.max(1, Math.min(10, Math.floor(mmi)));
+  const meta = MMI_CLASSES[intClass] || { roman: '?', desc: 'Unknown' };
+  return { label: `${meta.roman} – ${meta.desc}`, intClass, valueStr: mmi.toFixed(1) };
+}
+
+// Identify MMI at a point
+function identifyMMIAt(latlng, { tolerance = 8 } = {}) {
+  return new Promise((resolve, reject) => {
+    L.esri
+      .imageService({ url: SHAKING_MMI_URL })
+      .identify()
+      .on(map)
+      .at(latlng)
+      .tolerance(tolerance)
+      .returnGeometry(false)
+      .run((err, result, raw) => {
+        if (err) return reject(err);
+        const mmi = parseMMIFromIdentify(raw, result);
+        resolve(mmi); // may be null
+      });
+  });
+}
+
+// Light nearest search (same idea as landslides)
+async function findNearestMMI(latlng, { directions = 8, stepKm = 2, maxKm = 14 } = {}) {
+  const R = 6371, toRad = d => d * Math.PI/180, toDeg = r => r * 180/Math.PI;
+  function offsetPoint(p, km, brgDeg) {
+    const lat1 = toRad(p.lat), lon1 = toRad(p.lng), brg = toRad(brgDeg), dR = km / R;
+    const lat2 = Math.asin(Math.sin(lat1)*Math.cos(dR) + Math.cos(lat1)*Math.sin(dR)*Math.cos(brg));
+    const lon2 = lon1 + Math.atan2(Math.sin(brg)*Math.sin(dR)*Math.cos(lat1), Math.cos(dR)-Math.sin(lat1)*Math.sin(lat2));
+    return L.latLng(toDeg(lat2), ((toDeg(lon2)+540)%360)-180);
+  }
+  for (let r = stepKm; r <= maxKm; r += stepKm) {
+    for (let i = 0; i < directions; i++) {
+      const p = offsetPoint(latlng, r, (360/directions)*i);
+      // eslint-disable-next-line no-await-in-loop
+      const mmi = await identifyMMIAt(p).catch(() => null);
+      if (mmi != null) return { mmi, distanceKm: r, at: p };
+    }
+  }
+  return null;
+}
 
 // Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC)
 var calFireLayer = L.esri.featureLayer({
@@ -881,7 +959,7 @@ L.control.layers(
     "Fire Hazard Zones": fireHazardLayer,
     "Flood Hazard Zones": floodLayer,
     "Landslide Susceptibility": landslideLayer,
-    "Shaking Potential": shakingLayer,
+    "Shaking Potential (MMI, 10%/50yr)": shakingMMI_10in50,
     "Active Fires": calFireLayer,
 
     // Health
@@ -1225,6 +1303,35 @@ Nearest class: <strong>${nearest.label}</strong><br>
       checkDone();
     }
   })();
+
+  // === Shaking (MMI from PGV, 10% in 50 yrs) ===
+(async () => {
+  try {
+    const mmi = await identifyMMIAt(e.latlng);
+    if (mmi != null) {
+      const fmt = formatMMI(mmi);
+      results.push(`■ <strong>Earthquake Shaking (MMI, 10%/50yr):</strong><br>
+Estimated intensity: <strong>${fmt.valueStr}</strong> (<strong>${fmt.label}</strong>)`);
+      checkDone();
+      return;
+    }
+    // Not on data—look nearby
+    const nearest = await findNearestMMI(e.latlng, { directions: 8, stepKm: 2, maxKm: 14 });
+    if (nearest) {
+      const fmt = formatMMI(nearest.mmi);
+      results.push(`■ <strong>Earthquake Shaking (Nearest, 10%/50yr):</strong><br>
+Intensity: <strong>${fmt.valueStr}</strong> (<strong>${fmt.label}</strong>)<br>
+📏 Distance: ${nearest.distanceKm.toFixed(1)} km`);
+    } else {
+      results.push(`■ <strong>Earthquake Shaking (MMI, 10%/50yr):</strong> No mapped value nearby.`);
+    }
+  } catch (err) {
+    console.warn('MMI identify error:', err);
+    results.push(`■ <strong>Earthquake Shaking (MMI, 10%/50yr):</strong> Error fetching value.`);
+  } finally {
+    checkDone();
+  }
+})();
 
 }); // end click
 
