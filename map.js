@@ -258,14 +258,17 @@ var drinkP_Layer = L.esri.featureLayer({
 
 // ImageServer endpoint for the MS48 “MMI from PGV (10% in 50 yrs)”
 const SHAKING_MMI_URL =
-  'https://gis.conservation.ca.gov/arcgis/rest/services/MS48/MMI_from_PGV_10pct50yrs/ImageServer';
+  'https://gis.conservation.ca.gov/server/rest/services/MS48/MMI_from_PGV_10pct50yrs/ImageServer';
 
-// Visual layer (overlay)
+// Visual layer (overlay) — make sure it’s transparent and added so you can see it
 const shakingMMI_10in50 = L.esri.imageMapLayer({
   url: SHAKING_MMI_URL,
   opacity: 0.6,
+  transparent: true,     // <- important: avoid black/opaque background
+  format: 'png32',       // <- supports transparency
+  zIndex: 350,
   attribution: 'California Geological Survey (MS 48): MMI from PGV (10% in 50 years)'
-}); // .addTo(map) if you want it on by default
+})//.addTo(map);           // add by default while testing; you can remove after
 
 // MMI class lookup (rounded down to integer 1–10)
 const MMI_CLASSES = {
