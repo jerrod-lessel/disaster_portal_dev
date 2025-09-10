@@ -260,15 +260,21 @@ var drinkP_Layer = L.esri.featureLayer({
 const SHAKING_MMI_URL =
   'https://gis.conservation.ca.gov/server/rest/services/MS48/MMI_from_PGV_10pct50yrs/ImageServer';
 
-// Visual layer (overlay) — make sure it’s transparent and added so you can see it
+// Visual layer (overlay) — transparent PNG, added to the map
 const shakingMMI_10in50 = L.esri.imageMapLayer({
   url: SHAKING_MMI_URL,
   opacity: 0.6,
-  transparent: true,     // <- important: avoid black/opaque background
-  format: 'png32',       // <- supports transparency
+  transparent: true,   // avoid black background
+  format: 'png32',     // supports transparency
   zIndex: 350,
   attribution: 'California Geological Survey (MS 48): MMI from PGV (10% in 50 years)'
-})//.addTo(map);           // add by default while testing; you can remove after
+}).addTo(map);
+
+// Simple debug hooks (check your console)
+shakingMMI_10in50
+  .on('loading', () => console.log('MMI layer: loading…'))
+  .on('load',    () => console.log('MMI layer: loaded'))
+  .on('error',   (e) => console.error('MMI layer error:', e));
 
 // MMI class lookup (rounded down to integer 1–10)
 const MMI_CLASSES = {
@@ -336,7 +342,7 @@ async function findNearestMMI(latlng, { directions = 8, stepKm = 2, maxKm = 14 }
   return null;
 }
 
-/* ======= Other POIs / Infra (unchanged, trimmed to what you posted) ======= */
+/* ======= Other POIs / Infra (unchanged) ======= */
 
 // --- Live Wildfire Incidents Layer (VERIFIED Public Source from NIFC) ---
 var calFireLayer = L.esri.featureLayer({
@@ -639,7 +645,7 @@ var localBridgesLayer = L.esri.featureLayer({
   }
 });
 
-// Zoom-based visibility (unchanged)
+// Zoom-based visibility
 map.on('zoomend', function() {
   var z = map.getZoom();
   if (z <= 10) {
@@ -755,30 +761,16 @@ legendPanel.onAdd = () => {
       <div><i style="background:#769ccd;"></i> Regulatory Floodway</div>
     </div>
     <div class="legend-section">
-      <strong>Ozone Percentile</strong>
-      <div><i style="background:#08306b;"></i> 90–100</div>
-      <div><i style="background:#08519c;"></i> 80–89</div>
-      <div><i style="background:#2171b5;"></i> 70–79</div>
-      <div><i style="background:#4292c6;"></i> 60–69</div>
-      <div><i style="background:#6baed6;"></i> 50–59</div>
-      <div><i style="background:#9ecae1;"></i> 40–49</div>
-      <div><i style="background:#c6dbef;"></i> 30–39</div>
-      <div><i style="background:#deebf7;"></i> 20–29</div>
-      <div><i style="background:#f7fbff;"></i> 10–19</div>
-      <div><i style="background:#ffffcc;"></i> 0–9</div>
+      <strong>Ozone (Ground-Level)</strong>
+      <div>The indicator is the mean of summer months (May–Oct) of the daily max 8-hour ozone conc. (ppm). Represents short-term ozone health impacts.</div>
     </div>
     <div class="legend-section">
-      <strong>PM2.5 Percentile</strong>
-      <div><i style="background:#08306b;"></i> 90–100</div>
-      <div><i style="background:#08519c;"></i> 80–89</div>
-      <div><i style="background:#2171b5;"></i> 70–79</div>
-      <div><i style="background:#4292c6;"></i> 60–69</div>
-      <div><i style="background:#6baed6;"></i> 50–59</div>
-      <div><i style="background:#9ecae1;"></i> 40–49</div>
-      <div><i style="background:#c6dbef;"></i> 30–39</div>
-      <div><i style="background:#deebf7;"></i> 20–29</div>
-      <div><i style="background:#f7fbff;"></i> 10–19</div>
-      <div><i style="background:#ffffcc;"></i> 0–9</div>
+      <strong>PM2.5 (Fine Particulate Matter)</strong>
+      <div>Annual concentration in µg/m³; higher values indicate worse air quality.</div>
+    </div>
+    <div class="legend-section">
+      <strong>Drinking Water Contaminants</strong>
+      <div>Score is the sum of contaminant and violation percentiles (higher is worse).</div>
     </div>
     <div class="legend-section">
       <strong>Landslide Susceptibility</strong>
@@ -873,11 +865,12 @@ map.on("click", function (e) {
     if (!err && fc.features.length > 0) {
       const zone = fc.features[0].properties.FHSZ_Description;
       results.push(`■ <strong>Fire Hazard Zone:</strong><br>
-This area falls within a <strong>${zone}</strong> fire hazard zone as defined by CAL FIRE.`);
+This area falls within a <strong>${zone}</strong> fire hazard zone as defined by the California Department of Forestry and Fire Protection (CAL FIRE).<br>
+Fire hazard zones reflect the severity of potential fire exposure based on fuels, terrain, weather, and other factors.`);
       checkDone();
     } else {
       getClosestFeatureByEdgeDistance(fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description", results, function () {
-        results.push(`■ <em>Note:</em> Fire hazard zones reflect fuels, terrain, weather, and other factors.`);
+        results.push(`■ <em>Note:</em> Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.`);
         checkDone();
       });
     }
@@ -888,52 +881,58 @@ This area falls within a <strong>${zone}</strong> fire hazard zone as defined by
     if (!err && fc.features.length > 0) {
       const zone = fc.features[0].properties.ESRI_SYMBOLOGY;
       results.push(`■ <strong>Flood Hazard Zone:</strong><br>
-This location falls within a <strong>${zone}</strong> (FEMA NFHL).`);
+This location falls within a <strong>${zone}</strong> as designated by FEMA's National Flood Hazard Layer.<br>
+Flood zones represent areas at varying levels of flood risk during extreme weather events and are used to inform insurance, development, and evacuation planning.`);
       checkDone();
     } else {
       getClosestFeatureByEdgeDistance(floodLayer, e.latlng, "Flood Hazard Zone", "ESRI_SYMBOLOGY", results, function () {
-        results.push(`■ <em>Note:</em> FEMA flood zones guide insurance and development decisions.`);
+        results.push(`■ <em>Note:</em> FEMA flood zones help identify areas at high risk for flooding and guide floodplain management decisions across California.`);
         checkDone();
       });
     }
   });
 
-  // Ozone
+  // Ozone (full text)
   ozoneLayer.query().contains(e.latlng).run(function (err, fc) {
     if (!err && fc.features.length > 0) {
       const p = fc.features[0].properties;
       const ppm = p.ozone?.toFixed(3) ?? "unknown";
       const pct = p.ozoneP !== undefined ? Math.round(p.ozoneP) : "unknown";
       results.push(`■ <strong>Ozone (Ground-Level):</strong><br>
-Summed concentration: <strong>${ppm} ppm</strong> (percentile <strong>${pct}</strong>).`);
+The indicator is the mean of summer months (May – October) of the daily maximum 8-hour ozone concentration (ppm). This measurement is used to represent short-term ozone health impacts. This census tract has a summed concentration of <strong>${ppm} ppm</strong>.
+The ozone percentile for this census tract is <strong>${pct}</strong>, meaning the summed concentration is higher than ${pct}% of the census tracts in California.<br>
+<em>(Data from 2017 to 2019)</em>`);
       checkDone();
     } else {
       getClosestFeatureByEdgeDistance(ozoneLayer, e.latlng, "Ozone Level", "ozoneP", results, checkDone);
     }
   });
 
-  // PM2.5
+  // PM2.5 (full text)
   pmLayer.query().contains(e.latlng).run(function (err, fc) {
     if (!err && fc.features.length > 0) {
       const p = fc.features[0].properties;
       const value = p.pm?.toFixed(2) ?? "unknown";
       const pct = p.pmP !== undefined ? Math.round(p.pmP) : "unknown";
-      results.push(`■ <strong>PM2.5 Concentration:</strong><br>
-Value: <strong>${value} µg/m³</strong> (percentile <strong>${pct}</strong>).`);
+      results.push(`■ <strong>PM2.5 (Fine Particulate Matter) Concentration:</strong><br>
+This census tract has a concentration of <strong>${value} µg/m³</strong>. The PM2.5 percentile for this census tract is <strong>${pct}</strong>, meaning it is higher than ${pct}% of the census tracts in California.<br>
+<em>(Data from 2015 to 2017)</em>`);
       checkDone();
     } else {
       getClosestFeatureByEdgeDistance(pmLayer, e.latlng, "PM2.5 Concentration", "pmP", results, checkDone);
     }
   });
 
-  // Drinking water contaminants
+  // Drinking water (full text)
   drinkP_Layer.query().contains(e.latlng).run(function (err, fc) {
     if (!err && fc.features.length > 0) {
       const p = fc.features[0].properties;
       const value = p.drink?.toFixed(2) ?? "unknown";
       const pct = p.drinkP !== undefined ? Math.round(p.drinkP) : "unknown";
       results.push(`■ <strong>Drinking Water Contaminants:</strong><br>
-Score: <strong>${value}</strong> (percentile <strong>${pct}</strong>).`);
+The drinking water contaminant score for this census tract is <strong>${value}</strong>, which is the sum of the contaminant and violation percentiles.
+The drinking water contaminant percentile is <strong>${pct}</strong>, meaning it is higher than ${pct}% of census tracts in California.<br>
+<em>(Data from 2011–2019, the most recent complete compliance cycle.)</em>`);
       checkDone();
     } else {
       getClosestFeatureByEdgeDistance(drinkP_Layer, e.latlng, "Drinking Water Contaminant Score", "drinkP", results, checkDone);
@@ -946,7 +945,7 @@ Score: <strong>${value}</strong> (percentile <strong>${pct}</strong>).`);
       const label = await identifyLandslideAt(e.latlng);
       if (label) {
         results.push(`■ <strong>Landslide Susceptibility:</strong><br>
-Class <strong>${label}</strong> (CGS).`);
+Class <strong>${label}</strong> (California Geological Survey).`);
         checkDone();
         return;
       }
