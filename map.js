@@ -256,27 +256,25 @@ var drinkP_Layer = L.esri.featureLayer({
    SHAKING (MS48: MMI from PGV, 10% in 50 years)
    ================================ */
 
-// ImageServer endpoint for the MS48 “MMI from PGV (10% in 50 yrs)”
 const SHAKING_MMI_URL =
-  'https://gis.conservation.ca.gov/server/rest/services/MS48/MMI_from_PGV_10pct50yrs/ImageServer';
+  'https://gis.conservation.ca.gov/server/rest/services/CGS/MS48_MMI_PGV_10pc50/ImageServer';
 
-// Visual layer (overlay) — transparent PNG, added to the map
-const shakingMMI_10in50 = L.esri.imageMapLayer({
+// Visual layer (overlay)
+var shakingMMI_10in50 = L.esri.imageMapLayer({
   url: SHAKING_MMI_URL,
   opacity: 0.6,
-  transparent: true,   // avoid black background
-  format: 'png32',     // supports transparency
+  transparent: true,
+  format: 'png32',
   zIndex: 350,
   attribution: 'California Geological Survey (MS 48): MMI from PGV (10% in 50 years)'
 }).addTo(map);
 
-// Simple debug hooks (check your console)
 shakingMMI_10in50
   .on('loading', () => console.log('MMI layer: loading…'))
   .on('load',    () => console.log('MMI layer: loaded'))
   .on('error',   (e) => console.error('MMI layer error:', e));
 
-// MMI class lookup (rounded down to integer 1–10)
+// MMI class lookup
 const MMI_CLASSES = {
   1: { roman: 'I',    desc: 'Not felt' },
   2: { roman: 'II',   desc: 'Weak' },
@@ -290,7 +288,7 @@ const MMI_CLASSES = {
   10:{ roman: 'X+',   desc: 'Extreme' }
 };
 
-// Pull numeric MMI from ImageServer identify response
+// Parse MMI from identify response
 function parseMMIFromIdentify(rawResponse, resultObj) {
   let v = null;
   if (rawResponse && typeof rawResponse.value !== 'undefined') v = Number(rawResponse.value);
@@ -299,30 +297,32 @@ function parseMMIFromIdentify(rawResponse, resultObj) {
   return Number.isFinite(v) ? v : null;
 }
 
-// Convert numeric MMI to pretty label
 function formatMMI(mmi) {
   const intClass = Math.max(1, Math.min(10, Math.floor(mmi)));
   const meta = MMI_CLASSES[intClass] || { roman: '?', desc: 'Unknown' };
   return { label: `${meta.roman} – ${meta.desc}`, intClass, valueStr: mmi.toFixed(1) };
 }
 
-// Identify MMI at a point
+// Identify query against the ImageServer
 function identifyMMIAt(latlng, { tolerance = 8 } = {}) {
-  return new Promise((resolve, reject) => {
-    L.esri
-      .imageService({ url: SHAKING_MMI_URL })
+  return new Promise((resolve) => {
+    L.esri.imageService({ url: SHAKING_MMI_URL })
       .identify()
-      .on(map).at(latlng).tolerance(tolerance)
+      .on(map)
+      .at(latlng)
+      .tolerance(tolerance)
       .returnGeometry(false)
       .run((err, result, raw) => {
-        if (err) return reject(err);
-        const mmi = parseMMIFromIdentify(raw, result);
-        resolve(mmi); // may be null
+        if (err) {
+          console.warn('MMI identify error:', err);
+          resolve(null);
+        } else {
+          resolve(parseMMIFromIdentify(raw, result));
+        }
       });
   });
 }
 
-// Nearest MMI search (same pattern as landslides)
 async function findNearestMMI(latlng, { directions = 8, stepKm = 2, maxKm = 14 } = {}) {
   const R = 6371, toRad = d => d * Math.PI/180, toDeg = r => r * 180/Math.PI;
   function offsetPoint(p, km, brgDeg) {
