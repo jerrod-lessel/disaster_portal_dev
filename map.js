@@ -350,11 +350,16 @@ function identifyMMIAt(latlng) {
           console.log("MMI rawResponse:", raw);
           console.log("MMI resultObj:", res);
 
-          // The service gives "Service Pixel Value" under raw.properties.value
+          // For ImageServer: pixel values are often under raw.pixel
           let val = null;
-          if (raw && raw.properties && typeof raw.properties.value !== "undefined") {
+          if (raw && typeof raw.pixel !== "undefined") {
+            val = Number(raw.pixel);
+          } else if (raw && raw.properties && typeof raw.properties.value !== "undefined") {
             val = Number(raw.properties.value);
+          } else if (res && typeof res.value !== "undefined") {
+            val = Number(res.value);
           }
+
           resolve(Number.isFinite(val) ? val : null);
         }
       });
