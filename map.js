@@ -348,15 +348,19 @@ function identifyMMIAt(latlng) {
           resolve(null);
         } else {
           console.log("MMI rawResponse:", raw);
-          console.log("MMI resultObj:", res);
 
-          // For ImageServer: pixel values are often under raw.pixel
           let val = null;
-          if (raw && typeof raw.pixel !== "undefined") {
-            val = Number(raw.pixel);
-          } else if (raw && raw.properties && typeof raw.properties.value !== "undefined") {
-            val = Number(raw.properties.value);
-          } else if (res && typeof res.value !== "undefined") {
+
+          // Most ImageServers: raw.pixel.value
+          if (raw && raw.pixel && typeof raw.pixel.value !== "undefined") {
+            val = Number(raw.pixel.value);
+          }
+          // Sometimes just raw.value
+          else if (raw && typeof raw.value !== "undefined") {
+            val = Number(raw.value);
+          }
+          // Or res.value
+          else if (res && typeof res.value !== "undefined") {
             val = Number(res.value);
           }
 
@@ -365,6 +369,7 @@ function identifyMMIAt(latlng) {
       });
   });
 }
+
 
 async function findNearestMMI(latlng, { directions = 8, stepKm = 2, maxKm = 14 } = {}) {
   const R = 6371, toRad = d => d * Math.PI/180, toDeg = r => r * 180/Math.PI;
