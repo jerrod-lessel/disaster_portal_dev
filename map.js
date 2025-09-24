@@ -306,17 +306,24 @@ const MMI_CLASSES = {
 function parseMMIFromIdentify(rawResponse, resultObj) {
   let v = null;
 
-  // Esri ImageServer sometimes puts value here:
+  // 1. Check direct result.value
   if (resultObj && typeof resultObj.value !== 'undefined') {
     v = Number(resultObj.value);
   }
-  // or inside attributes
+
+  // 2. Attributes
   if (v == null && resultObj && resultObj.attributes && resultObj.attributes.value !== undefined) {
     v = Number(resultObj.attributes.value);
   }
-  // or in rawResponse.properties
+
+  // 3. Check rawResponse.properties.value (most likely for this service)
   if (v == null && rawResponse && rawResponse.properties && rawResponse.properties.value !== undefined) {
     v = Number(rawResponse.properties.value);
+  }
+
+  // 4. Fallback: sometimes rawResponse.value exists
+  if (v == null && typeof rawResponse?.value !== 'undefined') {
+    v = Number(rawResponse.value);
   }
 
   return Number.isFinite(v) ? v : null;
