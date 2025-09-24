@@ -336,22 +336,26 @@ function formatMMI(mmi) {
 }
 
 // Identify query against the ImageServer
-function identifyMMIAt(latlng, { tolerance = 8 } = {}) {
+function identifyMMIAt(latlng) {
   return new Promise((resolve) => {
     L.esri.imageService({ url: SHAKING_MMI_URL })
       .identify()
-      .on(map)
       .at(latlng)
-      .tolerance(tolerance)
       .returnGeometry(false)
-      .run((err, result, raw) => {
+      .run((err, res, raw) => {
         if (err) {
           console.warn('MMI identify error:', err);
           resolve(null);
         } else {
           console.log("MMI rawResponse:", raw);
-          console.log("MMI resultObj:", result);
-          resolve(parseMMIFromIdentify(raw, result));
+          console.log("MMI resultObj:", res);
+
+          // The service gives "Service Pixel Value" under raw.properties.value
+          let val = null;
+          if (raw && raw.properties && typeof raw.properties.value !== "undefined") {
+            val = Number(raw.properties.value);
+          }
+          resolve(Number.isFinite(val) ? val : null);
         }
       });
   });
