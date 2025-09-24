@@ -263,11 +263,25 @@ const SHAKING_MMI_URL =
 var shakingMMI_10in50 = L.esri.imageMapLayer({
   url: SHAKING_MMI_URL,
   opacity: 0.6,
-  transparent: true,
   format: 'png32',
+  transparent: true,
   zIndex: 350,
-  attribution: 'California Geological Survey (MS 48): MMI from PGV (10% in 50 years)'
-}).addTo(map);
+  attribution: 'California Geological Survey (MS 48): MMI from PGV (10% in 50 years)',
+  renderingRule: {
+    rasterFunction: "Colormap",
+    rasterFunctionArguments: {
+      Colormap: [
+        [4, 255, 255, 191], // #ffffbf
+        [5, 245, 245,   0], // #f5f500
+        [6, 247, 206,   0], // #f7ce00
+        [7, 250, 125,   0], // #fa7d00
+        [8, 253,  42,   0], // #fd2a00
+        [9, 199,   8,   8], // #c70808
+        [10,140,   8,   8]  // #8c0808
+      ]
+    }
+  }
+})//.addTo(map);
 
 shakingMMI_10in50
   .on('loading', () => console.log('MMI layer: loading…'))
@@ -291,9 +305,20 @@ const MMI_CLASSES = {
 // Parse MMI from identify response
 function parseMMIFromIdentify(rawResponse, resultObj) {
   let v = null;
-  if (rawResponse && typeof rawResponse.value !== 'undefined') v = Number(rawResponse.value);
-  if (v == null && rawResponse && typeof rawResponse.pixelValue !== 'undefined') v = Number(rawResponse.pixelValue);
-  if (v == null && resultObj && typeof resultObj.value !== 'undefined') v = Number(resultObj.value);
+
+  // Esri ImageServer sometimes puts value here:
+  if (resultObj && typeof resultObj.value !== 'undefined') {
+    v = Number(resultObj.value);
+  }
+  // or inside attributes
+  if (v == null && resultObj && resultObj.attributes && resultObj.attributes.value !== undefined) {
+    v = Number(resultObj.attributes.value);
+  }
+  // or in rawResponse.properties
+  if (v == null && rawResponse && rawResponse.properties && rawResponse.properties.value !== undefined) {
+    v = Number(rawResponse.properties.value);
+  }
+
   return Number.isFinite(v) ? v : null;
 }
 
