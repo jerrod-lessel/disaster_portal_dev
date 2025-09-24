@@ -349,6 +349,8 @@ function identifyMMIAt(latlng, { tolerance = 8 } = {}) {
           console.warn('MMI identify error:', err);
           resolve(null);
         } else {
+          console.log("MMI rawResponse:", raw);
+          console.log("MMI resultObj:", result);
           resolve(parseMMIFromIdentify(raw, result));
         }
       });
