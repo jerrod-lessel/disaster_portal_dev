@@ -902,7 +902,7 @@ map.on("click", function (e) {
   let completed = 0;
   function checkDone() {
     completed++;
-    if (completed === 7) { // fire, flood, ozone, pm, drinkP, landslide, shaking
+    if (completed === 8) { // fire, flood, ozone, pm, drinkP, landslide, shaking
       document.getElementById("report-content").innerHTML = results.join("<br><br>");
       hideSpinner();
     }
