@@ -889,6 +889,7 @@ function getClosestFeatureByEdgeDistance(layer, clickLatLng, label, fieldName, r
 /* ================================
    CLICK EVENT: HAZARD QUERIES
    ================================ */
+
 map.on("click", function (e) {
   showSpinner();
   if (clickMarker) map.removeLayer(clickMarker);
@@ -898,7 +899,7 @@ map.on("click", function (e) {
   document.getElementById("report-content").innerHTML =
     `<strong>Location:</strong><br>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}<br><em>Loading hazard information...</em>`;
 
-  // Dictionary to store results in fixed slots
+  // Dictionary for fixed ordering
   const results = {
     fire: "❌ Fire Hazard Zone: No data.",
     flood: "❌ Flood Hazard Zone: No data.",
@@ -915,7 +916,6 @@ map.on("click", function (e) {
   function checkDone() {
     completed++;
     if (completed === totalTasks) {
-      // Always render in this order
       const ordered = [
         results.fire,
         results.flood,
@@ -930,32 +930,55 @@ map.on("click", function (e) {
     }
   }
 
-  // --- Fire
+  // --- Fire (with nearest fallback + explanation)
   fireHazardLayer.query().contains(e.latlng).run((err, fc) => {
     if (!err && fc.features.length > 0) {
       const zone = fc.features[0].properties.FHSZ_Description;
       results.fire = `■ <strong>Fire Hazard Zone:</strong><br>
-      This area falls within a <strong>${zone}</strong> fire hazard zone (CAL FIRE).`;
+This area falls within a <strong>${zone}</strong> fire hazard zone as defined by CAL FIRE.<br>
+Fire hazard zones reflect the severity of potential fire exposure based on fuels, terrain, weather, and other factors.`;
+      checkDone();
+    } else {
+      getClosestFeatureByEdgeDistance(fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description", [], (txt) => {
+        results.fire = `■ <strong>Fire Hazard Zone:</strong><br>
+This location is not inside a mapped CAL FIRE hazard zone.<br>
+${txt}<br>
+<em>Note: Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.</em>`;
+        checkDone();
+      });
     }
-    checkDone();
   });
 
-  // --- Flood
+  // --- Flood (with nearest fallback + explanation)
   floodLayer.query().contains(e.latlng).run((err, fc) => {
     if (!err && fc.features.length > 0) {
       const zone = fc.features[0].properties.ESRI_SYMBOLOGY;
       results.flood = `■ <strong>Flood Hazard Zone:</strong><br>
-      This location is in a <strong>${zone}</strong> flood zone (FEMA).`;
+This location falls within a <strong>${zone}</strong> as designated by FEMA's National Flood Hazard Layer.<br>
+Flood zones represent areas at varying levels of flood risk during extreme weather events and are used to inform insurance, development, and evacuation planning.`;
+      checkDone();
+    } else {
+      getClosestFeatureByEdgeDistance(floodLayer, e.latlng, "Flood Hazard Zone", "ESRI_SYMBOLOGY", [], (txt) => {
+        results.flood = `■ <strong>Flood Hazard Zone:</strong><br>
+This location is not inside a FEMA-designated flood hazard zone.<br>
+${txt}<br>
+<em>Note: FEMA flood zones help identify areas at high risk for flooding and guide floodplain management decisions across California.</em>`;
+        checkDone();
+      });
     }
-    checkDone();
   });
 
   // --- Ozone
   ozoneLayer.query().contains(e.latlng).run((err, fc) => {
     if (!err && fc.features.length > 0) {
       const p = fc.features[0].properties;
+      const ppm = p.ozone?.toFixed(3) ?? "unknown";
+      const pct = p.ozoneP !== undefined ? Math.round(p.ozoneP) : "unknown";
       results.ozone = `■ <strong>Ozone (Ground-Level):</strong><br>
-      ${p.ozone?.toFixed(3)} ppm (percentile ${Math.round(p.ozoneP)})`;
+The indicator is the mean of summer months (May – October) of the daily maximum 8-hour ozone concentration (ppm). This measurement is used to represent short-term ozone health impacts.<br>
+This census tract has a summed concentration of <strong>${ppm} ppm</strong>.<br>
+The ozone percentile for this census tract is <strong>${pct}</strong>, meaning the concentration is higher than ${pct}% of census tracts in California.<br>
+<em>(Data from 2017 to 2019)</em>`;
     }
     checkDone();
   });
@@ -964,8 +987,12 @@ map.on("click", function (e) {
   pmLayer.query().contains(e.latlng).run((err, fc) => {
     if (!err && fc.features.length > 0) {
       const p = fc.features[0].properties;
-      results.pm = `■ <strong>PM2.5 Concentration:</strong><br>
-      ${p.pm?.toFixed(2)} µg/m³ (percentile ${Math.round(p.pmP)})`;
+      const value = p.pm?.toFixed(2) ?? "unknown";
+      const pct = p.pmP !== undefined ? Math.round(p.pmP) : "unknown";
+      results.pm = `■ <strong>PM2.5 (Fine Particulate Matter) Concentration:</strong><br>
+This census tract has a concentration of <strong>${value} µg/m³</strong>.<br>
+The PM2.5 percentile is <strong>${pct}</strong>, meaning it is higher than ${pct}% of census tracts in California.<br>
+<em>(Data from 2015 to 2017)</em>`;
     }
     checkDone();
   });
@@ -974,8 +1001,12 @@ map.on("click", function (e) {
   drinkP_Layer.query().contains(e.latlng).run((err, fc) => {
     if (!err && fc.features.length > 0) {
       const p = fc.features[0].properties;
+      const value = p.drink?.toFixed(2) ?? "unknown";
+      const pct = p.drinkP !== undefined ? Math.round(p.drinkP) : "unknown";
       results.drink = `■ <strong>Drinking Water Contaminants:</strong><br>
-      Score ${p.drink?.toFixed(2)} (percentile ${Math.round(p.drinkP)})`;
+The contaminant score for this census tract is <strong>${value}</strong> (sum of contaminant and violation percentiles).<br>
+Percentile: <strong>${pct}</strong> (higher = worse).<br>
+<em>(Data from 2011–2019 compliance cycle)</em>`;
     }
     checkDone();
   });
@@ -985,10 +1016,11 @@ map.on("click", function (e) {
     try {
       const label = await identifyLandslideAt(e.latlng);
       if (label) {
-        results.landslide = `■ <strong>Landslide Susceptibility:</strong><br>Class <strong>${label}</strong>`;
+        results.landslide = `■ <strong>Landslide Susceptibility:</strong><br>
+Class <strong>${label}</strong> (California Geological Survey).`;
       }
-    } catch {
-      // leave default ❌ message
+    } catch (err) {
+      results.landslide = "■ <strong>Landslide Susceptibility:</strong> Error fetching value.";
     } finally {
       checkDone();
     }
@@ -1001,10 +1033,10 @@ map.on("click", function (e) {
       if (mmi != null) {
         const fmt = formatMMI(mmi);
         results.shaking = `■ <strong>Shaking Potential (MMI, 10%/50yr):</strong><br>
-        Estimated intensity: <strong>${fmt.valueStr}</strong> (${fmt.label})`;
+Estimated intensity: <strong>${fmt.valueStr}</strong> (${fmt.label}).`;
       }
-    } catch {
-      // leave default ❌ message
+    } catch (err) {
+      results.shaking = "■ <strong>Shaking Potential:</strong> Error fetching value.";
     } finally {
       checkDone();
     }
