@@ -553,12 +553,14 @@ function getChargersInView() {
             icon: L.divIcon({ html: "🔋", className: "evcharger-icon", iconSize: L.point(30, 30) })
           });
           const popupContent = `
-            <strong>${ai.Title}</strong><br><hr>
-            <strong>Status:</strong> ${status} (${usage})<br>
-            <strong>Network:</strong> ${network}<br>
-            <strong>Total Charging Ports:</strong> ${totalPorts}<br><br>
-            <strong>Equipment Breakdown:</strong>
-            <ul>${equipmentInfo}</ul>
+            <div class="ev-popup">
+              <strong>${ai.Title}</strong><br><hr>
+              <strong>Status:</strong> ${status} (${usage})<br>
+              <strong>Network:</strong> ${network}<br>
+              <strong>Total Charging Ports:</strong> ${totalPorts}<br><br>
+              <strong>Equipment Breakdown:</strong>
+              <ul>${equipmentInfo}</ul>
+            </div>
           `;
           marker.bindPopup(popupContent).addTo(evChargersLayer);
         }
