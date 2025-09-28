@@ -865,6 +865,28 @@ function getDistanceToPolygonEdge(clickLatLng, feature) {
   return distance.toFixed(2);
 }
 
+function getClosestFeatureByEdgeDistance(layer, clickLatLng, label, fieldName, _unused, callback) {
+  layer.query().nearby(clickLatLng, 80467).run(function (err, fc) {
+    if (!err && fc.features.length > 0) {
+      let minDist = Infinity, bestFeature = null;
+      fc.features.forEach(feature => {
+        const dist = parseFloat(getDistanceToPolygonEdge(clickLatLng, feature));
+        if (!isNaN(dist) && dist < minDist) {
+          minDist = dist;
+          bestFeature = feature;
+        }
+      });
+      if (bestFeature) {
+        const txt = `■ <strong>Nearest ${label}:</strong> ${bestFeature.properties[fieldName]}<br>📏 Distance: ${minDist} mi`;
+        callback(txt);
+        return;
+      }
+    }
+    callback(`❌ <strong>${label}:</strong> No nearby zones found`);
+  });
+}
+
+/*
 // Generalized nearest feature query
 function getClosestFeatureByEdgeDistance(layer, clickLatLng, label, fieldName, results, finishCallback) {
   layer.query().nearby(clickLatLng, 80467).run(function (err, fc) {
@@ -885,6 +907,7 @@ function getClosestFeatureByEdgeDistance(layer, clickLatLng, label, fieldName, r
     finishCallback();
   });
 }
+*/
 
 /* ================================
    CLICK EVENT: HAZARD QUERIES
@@ -930,43 +953,45 @@ map.on("click", function (e) {
     }
   }
 
-  // --- Fire (with nearest fallback + explanation)
-  fireHazardLayer.query().contains(e.latlng).run((err, fc) => {
-    if (!err && fc.features.length > 0) {
-      const zone = fc.features[0].properties.FHSZ_Description;
-      results.fire = `■ <strong>Fire Hazard Zone:</strong><br>
-This area falls within a <strong>${zone}</strong> fire hazard zone as defined by CAL FIRE.<br>
+  // --- Fire
+fireHazardLayer.query().contains(e.latlng).run((err, fc) => {
+  if (!err && fc.features.length > 0) {
+    const zone = fc.features[0].properties.FHSZ_Description;
+    results.fire = `■ <strong>Fire Hazard Zone:</strong><br>
+This area falls within a <strong>${zone}</strong> fire hazard zone as defined by the California Department of Forestry and Fire Protection (CAL FIRE).<br>
 Fire hazard zones reflect the severity of potential fire exposure based on fuels, terrain, weather, and other factors.`;
-      checkDone();
-    } else {
-      getClosestFeatureByEdgeDistance(fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description", [], (txt) => {
-        results.fire = `■ <strong>Fire Hazard Zone:</strong><br>
-This location is not inside a mapped CAL FIRE hazard zone.<br>
-${txt}<br>
-<em>Note: Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.</em>`;
+    checkDone();
+  } else {
+    // fallback: nearest zone
+    getClosestFeatureByEdgeDistance(
+      fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description",
+      [], (nearestText) => {
+        results.fire = nearestText + `<br><em>Note: Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.</em>`;
         checkDone();
-      });
-    }
-  });
+      }
+    );
+  }
+});
 
-  // --- Flood (with nearest fallback + explanation)
-  floodLayer.query().contains(e.latlng).run((err, fc) => {
-    if (!err && fc.features.length > 0) {
-      const zone = fc.features[0].properties.ESRI_SYMBOLOGY;
-      results.flood = `■ <strong>Flood Hazard Zone:</strong><br>
+// --- Flood
+floodLayer.query().contains(e.latlng).run((err, fc) => {
+  if (!err && fc.features.length > 0) {
+    const zone = fc.features[0].properties.ESRI_SYMBOLOGY;
+    results.flood = `■ <strong>Flood Hazard Zone:</strong><br>
 This location falls within a <strong>${zone}</strong> as designated by FEMA's National Flood Hazard Layer.<br>
 Flood zones represent areas at varying levels of flood risk during extreme weather events and are used to inform insurance, development, and evacuation planning.`;
-      checkDone();
-    } else {
-      getClosestFeatureByEdgeDistance(floodLayer, e.latlng, "Flood Hazard Zone", "ESRI_SYMBOLOGY", [], (txt) => {
-        results.flood = `■ <strong>Flood Hazard Zone:</strong><br>
-This location is not inside a FEMA-designated flood hazard zone.<br>
-${txt}<br>
-<em>Note: FEMA flood zones help identify areas at high risk for flooding and guide floodplain management decisions across California.</em>`;
+    checkDone();
+  } else {
+    // fallback: nearest zone
+    getClosestFeatureByEdgeDistance(
+      floodLayer, e.latlng, "Flood Hazard Zone", "ESRI_SYMBOLOGY",
+      [], (nearestText) => {
+        results.flood = nearestText + `<br><em>Note: FEMA flood zones help identify areas at high risk for flooding and guide floodplain management decisions across California.</em>`;
         checkDone();
-      });
-    }
-  });
+      }
+    );
+  }
+});
 
   // --- Ozone
   ozoneLayer.query().contains(e.latlng).run((err, fc) => {
