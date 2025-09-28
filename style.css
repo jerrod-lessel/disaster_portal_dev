@@ -446,3 +446,9 @@ html, body {
   max-height: 200px;   /* adjust for your needs */
   overflow-y: auto;
 }
+
+.ev-popup {
+  max-height: 220px;   /* adjust to taste */
+  overflow-y: auto;    /* adds a scrollbar if it’s too tall */
+}
+
