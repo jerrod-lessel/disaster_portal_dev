@@ -440,3 +440,9 @@ html, body {
 #about-toggle:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
+
+/* Limit popup size and make contents scroll if too long */
+.leaflet-popup-content {
+  max-height: 200px;   /* adjust for your needs */
+  overflow-y: auto;
+}
