@@ -939,11 +939,8 @@ This area falls within a <strong>${zone}</strong> fire hazard zone as defined by
 Fire hazard zones reflect the severity of potential fire exposure based on fuels, terrain, weather, and other factors.`;
       checkDone();
     } else {
-      getClosestFeatureByEdgeDistance(fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description", [], (txt) => {
-        results.fire = `■ <strong>Fire Hazard Zone:</strong><br>
-This location is not inside a mapped CAL FIRE hazard zone.<br>
-${txt}<br>
-<em>Note: Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.</em>`;
+      getClosestFeatureByEdgeDistance(fireHazardLayer, e.latlng, "Fire Hazard Zone", "FHSZ_Description", results, function () {
+        results.push(`■ <em>Note:</em> Fire hazard zones are designated by CAL FIRE to help guide planning and mitigation efforts in wildfire-prone regions.`);
         checkDone();
       });
     }
