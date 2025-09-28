@@ -898,6 +898,130 @@ map.on("click", function (e) {
   document.getElementById("report-content").innerHTML =
     `<strong>Location:</strong><br>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}<br><em>Loading hazard information...</em>`;
 
+  // Dictionary to store results in fixed slots
+  const results = {
+    fire: "❌ Fire Hazard Zone: No data.",
+    flood: "❌ Flood Hazard Zone: No data.",
+    ozone: "❌ Ozone: No data.",
+    pm: "❌ PM2.5: No data.",
+    drink: "❌ Drinking Water: No data.",
+    landslide: "❌ Landslide Susceptibility: No data.",
+    shaking: "❌ Shaking Potential: No data."
+  };
+
+  let completed = 0;
+  const totalTasks = Object.keys(results).length;
+
+  function checkDone() {
+    completed++;
+    if (completed === totalTasks) {
+      // Always render in this order
+      const ordered = [
+        results.fire,
+        results.flood,
+        results.ozone,
+        results.pm,
+        results.drink,
+        results.landslide,
+        results.shaking
+      ];
+      document.getElementById("report-content").innerHTML = ordered.join("<br><br>");
+      hideSpinner();
+    }
+  }
+
+  // --- Fire
+  fireHazardLayer.query().contains(e.latlng).run((err, fc) => {
+    if (!err && fc.features.length > 0) {
+      const zone = fc.features[0].properties.FHSZ_Description;
+      results.fire = `■ <strong>Fire Hazard Zone:</strong><br>
+      This area falls within a <strong>${zone}</strong> fire hazard zone (CAL FIRE).`;
+    }
+    checkDone();
+  });
+
+  // --- Flood
+  floodLayer.query().contains(e.latlng).run((err, fc) => {
+    if (!err && fc.features.length > 0) {
+      const zone = fc.features[0].properties.ESRI_SYMBOLOGY;
+      results.flood = `■ <strong>Flood Hazard Zone:</strong><br>
+      This location is in a <strong>${zone}</strong> flood zone (FEMA).`;
+    }
+    checkDone();
+  });
+
+  // --- Ozone
+  ozoneLayer.query().contains(e.latlng).run((err, fc) => {
+    if (!err && fc.features.length > 0) {
+      const p = fc.features[0].properties;
+      results.ozone = `■ <strong>Ozone (Ground-Level):</strong><br>
+      ${p.ozone?.toFixed(3)} ppm (percentile ${Math.round(p.ozoneP)})`;
+    }
+    checkDone();
+  });
+
+  // --- PM2.5
+  pmLayer.query().contains(e.latlng).run((err, fc) => {
+    if (!err && fc.features.length > 0) {
+      const p = fc.features[0].properties;
+      results.pm = `■ <strong>PM2.5 Concentration:</strong><br>
+      ${p.pm?.toFixed(2)} µg/m³ (percentile ${Math.round(p.pmP)})`;
+    }
+    checkDone();
+  });
+
+  // --- Drinking water
+  drinkP_Layer.query().contains(e.latlng).run((err, fc) => {
+    if (!err && fc.features.length > 0) {
+      const p = fc.features[0].properties;
+      results.drink = `■ <strong>Drinking Water Contaminants:</strong><br>
+      Score ${p.drink?.toFixed(2)} (percentile ${Math.round(p.drinkP)})`;
+    }
+    checkDone();
+  });
+
+  // --- Landslide
+  (async () => {
+    try {
+      const label = await identifyLandslideAt(e.latlng);
+      if (label) {
+        results.landslide = `■ <strong>Landslide Susceptibility:</strong><br>Class <strong>${label}</strong>`;
+      }
+    } catch {
+      // leave default ❌ message
+    } finally {
+      checkDone();
+    }
+  })();
+
+  // --- Shaking
+  (async () => {
+    try {
+      const mmi = await identifyMMIAt(e.latlng);
+      if (mmi != null) {
+        const fmt = formatMMI(mmi);
+        results.shaking = `■ <strong>Shaking Potential (MMI, 10%/50yr):</strong><br>
+        Estimated intensity: <strong>${fmt.valueStr}</strong> (${fmt.label})`;
+      }
+    } catch {
+      // leave default ❌ message
+    } finally {
+      checkDone();
+    }
+  })();
+
+});
+
+/*
+map.on("click", function (e) {
+  showSpinner();
+  if (clickMarker) map.removeLayer(clickMarker);
+  clickMarker = L.marker(e.latlng).addTo(map);
+
+  const lat = e.latlng.lat, lng = e.latlng.lng;
+  document.getElementById("report-content").innerHTML =
+    `<strong>Location:</strong><br>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}<br><em>Loading hazard information...</em>`;
+
   const results = [];
   let completed = 0;
   function checkDone() {
@@ -1040,3 +1164,4 @@ Intensity: <strong>${fmt.valueStr}</strong> (<strong>${fmt.label}</strong>)<br>�
   })();
 
 }); // end click
+*/
